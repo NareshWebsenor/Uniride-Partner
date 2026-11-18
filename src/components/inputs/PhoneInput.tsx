@@ -1,14 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import React, { useRef } from 'react';
-import {
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-  TouchableOpacity,
-  ViewStyle,
-  TextStyle,
-} from 'react-native';
+import { StyleSheet, View, TouchableOpacity, ViewStyle, TextStyle } from 'react-native';
+import { ScaledText as Text, ScaledTextInput as TextInput } from '@/components/ui/Typography';
 import { themeType } from '@/interface/theme.type';
 import { fontSize, fontFamily, Ionicons } from '@/utils/fontIcon.utils';
 import { ICountry } from '@/utils/countryData';

@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useThemeColor } from '@/hooks/useThemeColor';
-import { radii, spacing } from '@/theme/tokens';
+import { hp, wp } from '@/utils/responsive.utils';
 import { Button } from './Button';
 import { Heading, Text } from './Text';
 
@@ -26,7 +26,7 @@ export function LoadingIndicator({ message }: { message?: string }) {
 
 export function Skeleton({
   width = '100%',
-  height = spacing.lg,
+  height = hp('3%'),
 }: {
   width?: DimensionValue;
   height?: number;
@@ -80,7 +80,7 @@ export function Skeleton({
         width,
         height,
         opacity,
-        borderRadius: radii.sm,
+        borderRadius: wp('2%'),
         backgroundColor: colors.disabled,
       }}
     />
@@ -132,6 +132,6 @@ export function ErrorState({
 }
 
 const styles = StyleSheet.create({
-  state: { padding: spacing.lg, gap: spacing.md, alignItems: 'center' },
+  state: { padding: wp('6%'), gap: wp('4%'), alignItems: 'center' },
   message: { textAlign: 'center' },
 });

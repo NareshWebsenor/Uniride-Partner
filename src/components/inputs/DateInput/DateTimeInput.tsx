@@ -1,4 +1,5 @@
-import { Pressable, StyleSheet, Text, View, ViewStyle } from 'react-native';
+import { Pressable, StyleSheet, View, ViewStyle } from 'react-native';
+import { ScaledText as Text } from '@/components/ui/Typography';
 import React, { useState } from 'react';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import { formatDate } from '@/utils/helper.utils';

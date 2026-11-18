@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
+import { ScaledText as Text } from '@/components/ui/Typography';
 import React from 'react';
 import { CustomModal } from '..';
 import { fontFamily, fontSize, MaterialIcons } from '@/utils/fontIcon.utils';

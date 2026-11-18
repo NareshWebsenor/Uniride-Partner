@@ -5,7 +5,7 @@ import { Button, Card, Heading, Text } from '@/components/ui';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import type { BiometricFailure } from '@/service/biometricAppLock';
-import { sizes, spacing } from '@/theme/tokens';
+import { hp, wp } from '@/utils/responsive.utils';
 import { Ionicons } from '@/utils/fontIcon.utils';
 
 type BiometricLockModalProps = {
@@ -31,8 +31,8 @@ export function BiometricLockModal({
         styles.overlay,
         {
           backgroundColor: colors.overlay,
-          paddingTop: insets.top + spacing.md,
-          paddingBottom: insets.bottom + spacing.md,
+          paddingTop: insets.top + hp('2%'),
+          paddingBottom: insets.bottom + hp('2%'),
         },
       ]}
     >
@@ -46,7 +46,7 @@ export function BiometricLockModal({
           <View accessible={false} style={styles.icon}>
             <Ionicons
               name="lock-closed"
-              size={sizes.brandMark}
+              size={wp('13%')}
               color={colors.primary}
             />
           </View>
@@ -84,10 +84,10 @@ const styles = StyleSheet.create({
     elevation: 1000,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: spacing.lg,
+    paddingHorizontal: wp('6%'),
   },
-  card: { width: '100%', maxWidth: sizes.authContent, maxHeight: '100%' },
-  content: { gap: spacing.md },
+  card: { width: '100%', maxWidth: 440, maxHeight: '100%' },
+  content: { gap: wp('4%') },
   icon: { alignItems: 'center' },
   centered: { textAlign: 'center' },
 });

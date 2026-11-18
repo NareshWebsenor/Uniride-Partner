@@ -2,7 +2,7 @@ import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useThemeColor } from '@/hooks/useThemeColor';
-import { sizes, spacing } from '@/theme/tokens';
+import { hp, wp } from '@/utils/responsive.utils';
 import { Ionicons } from '@/utils/fontIcon.utils';
 import { IconButton } from './Button';
 import { Heading } from './Text';
@@ -27,7 +27,7 @@ export function Header({
           icon={
             <Ionicons
               name="arrow-back"
-              size={sizes.icon}
+              size={wp('6%')}
               color={colors.textPrimary}
             />
           }
@@ -43,9 +43,9 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.sm,
-    minHeight: sizes.touchTarget,
-    paddingVertical: spacing.sm,
+    gap: wp('2%'),
+    minHeight: Math.max(48, hp('6%')),
+    paddingVertical: hp('1%'),
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
   title: { flex: 1 },

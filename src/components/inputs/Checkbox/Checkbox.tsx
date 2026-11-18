@@ -1,5 +1,5 @@
 import React from 'react';
-import { TextStyle, ViewStyle } from 'react-native';
+import { StyleProp, TextStyle, ViewStyle } from 'react-native';
 import { Checkbox as SelectionCheckbox } from '@/components/ui/SelectionControls';
 
 type Props = {
@@ -9,7 +9,7 @@ type Props = {
   activeColor?: string;
   inactiveColor?: string;
   labelStyle?: TextStyle;
-  containerStyle?: ViewStyle;
+  containerStyle?: StyleProp<ViewStyle>;
   checkboxStyle?: TextStyle;
 };
 

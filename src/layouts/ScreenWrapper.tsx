@@ -1,6 +1,6 @@
 import React from 'react';
 import { ScrollView, StyleProp, StyleSheet, ViewStyle } from 'react-native';
-import SafeAreaWrapper from '@/components/hoc/SafeAreaWrapper';
+import AppBackground from '@/components/background/AppBackground';
 import { Container } from './Container';
 
 export type ScreenWrapperProps = {
@@ -15,7 +15,7 @@ export function ScreenWrapper({
   style,
 }: ScreenWrapperProps) {
   return (
-    <SafeAreaWrapper>
+    <AppBackground>
       {scroll ? (
         <ScrollView
           keyboardShouldPersistTaps="handled"
@@ -26,7 +26,7 @@ export function ScreenWrapper({
       ) : (
         <Container style={[styles.fill, style]}>{children}</Container>
       )}
-    </SafeAreaWrapper>
+    </AppBackground>
   );
 }
 

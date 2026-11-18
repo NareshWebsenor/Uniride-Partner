@@ -1,4 +1,8 @@
-# Biometric app lock
+# Module 1 — Splash aur Biometric: App Lock
+
+Ye Module 1 ka biometric implementation guide hai.
+[Module index aur splash/startup](starter-setup.md) ·
+[Module 2 — Auth Flow](auth-flow.md).
 
 > Deferred source only: App does not mount this gate and Settings does not show
 > its switch. Existing preference/credentials are preserved. The sections below

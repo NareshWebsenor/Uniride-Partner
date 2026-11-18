@@ -1,4 +1,5 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
+import { ScaledText as Text } from '@/components/ui/Typography';
 import React from 'react';
 import { themeType } from '@/interface/theme.type';
 import { fontSize } from '@/utils/fontIcon.utils';

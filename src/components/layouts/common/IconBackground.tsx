@@ -1,5 +1,6 @@
 import { useThemeColor } from '@/hooks/useThemeColor';
-import { StyleSheet, Text, View, ViewStyle } from 'react-native';
+import { StyleSheet, View, ViewStyle } from 'react-native';
+import { ScaledText as Text } from '@/components/ui/Typography';
 import React, { ReactNode } from 'react';
 import LinearGradient from 'react-native-linear-gradient';
 import { useThemedStyles } from '@/hooks/useThemedStyles';

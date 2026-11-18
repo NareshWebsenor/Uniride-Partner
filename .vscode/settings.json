@@ -1,0 +1,48 @@
+{
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnSave": true,
+  "editor.formatOnPaste": true,
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[javascriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "eslint.validate": [
+    "javascript",
+    "javascriptreact",
+    "typescript",
+    "typescriptreact"
+  ],
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+  "java.import.gradle.enabled": false,
+  "java.autobuild.enabled": false,
+  "java.server.launchMode": "LightWeight",
+  "java.compile.nullAnalysis.mode": "disabled",
+  "java.import.exclusions": [
+    "**/node_modules/**",
+    "**/.git/**",
+    "**/android/**",
+    "**/ios/**"
+  ],
+  "gradle.autoDetect": "off",
+  "gradle.nestedProjects": false,
+  "files.watcherExclude": {
+    "**/.git/objects/**": true,
+    "**/.git/subtree-cache/**": true,
+    "**/node_modules/**": true,
+    "**/android/.gradle/**": true,
+    "**/android/app/build/**": true,
+    "**/android/build/**": true,
+    "**/ios/build/**": true,
+    "**/ios/Pods/**": true
+  }
+}

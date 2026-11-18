@@ -1,15 +1,15 @@
 import React, { forwardRef, useState } from 'react';
 import {
-  TextInput as NativeTextInput,
   TextInputProps as NativeTextInputProps,
   StyleProp,
   StyleSheet,
   View,
   ViewStyle,
 } from 'react-native';
+import { ScaledTextInput as NativeTextInput } from '@/components/ui/Typography';
 import { useTranslation } from 'react-i18next';
 import { useThemeColor } from '@/hooks/useThemeColor';
-import { radii, sizes, spacing, typography } from '@/theme/tokens';
+import { fSize, hp, wp } from '@/utils/responsive.utils';
 import { Ionicons } from '@/utils/fontIcon.utils';
 import { IconButton } from './Button';
 import { Text } from './Text';
@@ -106,11 +106,7 @@ export function SearchInput(props: TextInputProps) {
       returnKeyType="search"
       {...props}
       left={
-        <Ionicons
-          name="search"
-          size={sizes.icon}
-          color={colors.textSecondary}
-        />
+        <Ionicons name="search" size={wp('6%')} color={colors.textSecondary} />
       }
       right={
         props.value && props.editable !== false ? (
@@ -120,7 +116,7 @@ export function SearchInput(props: TextInputProps) {
             icon={
               <Ionicons
                 name="close"
-                size={sizes.icon}
+                size={wp('6%')}
                 color={colors.textSecondary}
               />
             }
@@ -132,21 +128,21 @@ export function SearchInput(props: TextInputProps) {
 }
 
 const styles = StyleSheet.create({
-  wrapper: { gap: spacing.xs },
+  wrapper: { gap: wp('1%') },
   label: { fontWeight: '600' },
   field: {
     flexDirection: 'row',
     alignItems: 'center',
     borderWidth: 1,
-    borderRadius: radii.md,
-    paddingHorizontal: spacing.sm,
-    gap: spacing.sm,
+    borderRadius: wp('3%'),
+    paddingHorizontal: wp('2%'),
+    gap: wp('2%'),
   },
   input: {
     flex: 1,
     minWidth: 0,
-    minHeight: sizes.input,
-    paddingVertical: spacing.sm,
-    fontSize: typography.body,
+    minHeight: Math.max(48, hp('6%')),
+    paddingVertical: hp('1%'),
+    fontSize: fSize(2),
   },
 });

@@ -1,11 +1,5 @@
-import {
-  ActivityIndicator,
-  Platform,
-  StyleSheet,
-  Text,
-  View,
-  ViewStyle,
-} from 'react-native';
+import { ActivityIndicator, Platform, StyleSheet, View, ViewStyle } from 'react-native';
+import { ScaledText as Text } from '@/components/ui/Typography';
 import React from 'react';
 import { themeType } from '@/interface/theme.type';
 import { height, width } from '@/utils/responsive.utils';

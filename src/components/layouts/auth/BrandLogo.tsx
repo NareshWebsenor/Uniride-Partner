@@ -4,14 +4,14 @@ import Svg, { Circle, Path } from 'react-native-svg';
 import { Text } from '@/components/ui/Text';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
 import { useThemeColor } from '@/hooks/useThemeColor';
-import { sizes, spacing, typography } from '@/theme/tokens';
+import { fSize, wp } from '@/utils/responsive.utils';
 
 export default function BrandLogo() {
   const colors = useThemeColor();
   const { t } = useAppTranslation();
   return (
     <View accessible accessibilityLabel={t('ride.brand')} style={styles.row}>
-      <Svg width={sizes.brandMark} height={sizes.brandMark} viewBox="0 0 64 64">
+      <Svg width={wp('13%')} height={wp('13%')} viewBox="0 0 64 64">
         <Circle cx="32" cy="32" r="30" fill={colors.brandAccent} />
         <Circle cx="32" cy="32" r="26" fill={colors.brandMark} />
         <Path
@@ -34,7 +34,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: spacing.sm,
+    gap: wp('2%'),
   },
-  name: { fontSize: typography.brand, fontWeight: '600', flexShrink: 1 },
+  name: { fontSize: fSize(4.5), fontWeight: '600', flexShrink: 1 },
 });

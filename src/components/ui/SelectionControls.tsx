@@ -9,7 +9,7 @@ import {
   ViewStyle,
 } from 'react-native';
 import { useThemeColor } from '@/hooks/useThemeColor';
-import { radii, sizes, spacing } from '@/theme/tokens';
+import { hp, wp } from '@/utils/responsive.utils';
 import { Ionicons } from '@/utils/fontIcon.utils';
 import { Text } from './Text';
 
@@ -57,7 +57,7 @@ function Selection({
         style={[
           styles.mark,
           {
-            borderRadius: radio ? radii.pill : spacing.xs,
+            borderRadius: radio ? 999 : wp('1%'),
             borderColor: value
               ? activeColor ?? colors.primary
               : inactiveColor ?? colors.border,
@@ -71,7 +71,7 @@ function Selection({
         {value ? (
           <Ionicons
             name={radio ? 'ellipse' : 'checkmark'}
-            size={radio ? spacing.sm : spacing.md}
+            size={radio ? wp('2%') : wp('4%')}
             color={colors.onPrimary}
           />
         ) : null}
@@ -141,15 +141,15 @@ export function Switch({
 
 const styles = StyleSheet.create({
   row: {
-    minHeight: sizes.touchTarget,
+    minHeight: Math.max(48, hp('6%')),
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.sm,
+    gap: wp('2%'),
   },
   label: { flex: 1, flexShrink: 1 },
   mark: {
-    width: sizes.icon,
-    height: sizes.icon,
+    width: wp('6%'),
+    height: wp('6%'),
     borderWidth: 2,
     alignItems: 'center',
     justifyContent: 'center',

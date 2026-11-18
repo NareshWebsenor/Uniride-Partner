@@ -1,4 +1,5 @@
 export { Button, IconButton } from './Button';
+export { default as BottomTabBar } from './BottomTabBar';
 export type { ButtonProps, IconButtonProps } from './Button';
 export { Text, Heading } from './Text';
 export type { TextProps } from './Text';

@@ -5,7 +5,8 @@ import {
   MenuOption,
   MenuTrigger,
 } from 'react-native-popup-menu';
-import { StyleSheet, Text, TextStyle, View, ViewStyle } from 'react-native';
+import { StyleSheet, TextStyle, View, ViewStyle } from 'react-native';
+import { ScaledText as Text } from '@/components/ui/Typography';
 import { fontFamily, fontSize, Ionicons } from '@/utils/fontIcon.utils';
 import { themeType } from '@/interface/theme.type';
 import { useThemedStyles } from '@/hooks/useThemedStyles';

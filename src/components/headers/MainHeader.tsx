@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, StyleSheet, Text, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
+import { ScaledText as Text } from '@/components/ui/Typography';
 import { themeType } from '@/interface/theme.type';
 import { fontFamily, fontSize, Ionicons } from '@/utils/fontIcon.utils';
 import { useThemedStyles } from '@/hooks/useThemedStyles';

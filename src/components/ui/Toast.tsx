@@ -10,7 +10,7 @@ import { StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { useThemeColor } from '@/hooks/useThemeColor';
-import { radii, sizes, spacing } from '@/theme/tokens';
+import { hp, wp } from '@/utils/responsive.utils';
 import { Ionicons } from '@/utils/fontIcon.utils';
 import { IconButton } from './Button';
 import { Heading, Text } from './Text';
@@ -50,11 +50,7 @@ export function Alert({
           accessibilityLabel={t('ui.dismiss')}
           onPress={onDismiss}
           icon={
-            <Ionicons
-              name="close"
-              size={sizes.icon}
-              color={colors.textPrimary}
-            />
+            <Ionicons name="close" size={wp('6%')} color={colors.textPrimary} />
           }
         />
       ) : null}
@@ -101,7 +97,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
       {toast ? (
         <View
           pointerEvents="box-none"
-          style={[styles.toast, { bottom: insets.bottom + spacing.md }]}
+          style={[styles.toast, { bottom: insets.bottom + hp('2%') }]}
         >
           <Alert
             message={
@@ -128,19 +124,19 @@ export function useToast() {
 
 const styles = StyleSheet.create({
   alert: {
-    padding: spacing.md,
+    padding: wp('4%'),
     borderWidth: 1,
-    borderRadius: radii.md,
-    gap: spacing.sm,
+    borderRadius: wp('3%'),
+    gap: wp('2%'),
     flexDirection: 'row',
     alignItems: 'center',
   },
-  message: { flex: 1, gap: spacing.xs },
+  message: { flex: 1, gap: wp('1%') },
   toast: {
     position: 'absolute',
-    left: spacing.md,
-    right: spacing.md,
-    maxWidth: sizes.maxContentWidth,
+    left: wp('4%'),
+    right: wp('4%'),
+    maxWidth: 720,
     alignSelf: 'center',
   },
 });

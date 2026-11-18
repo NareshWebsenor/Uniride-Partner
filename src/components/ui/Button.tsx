@@ -1,5 +1,5 @@
-import React from 'react';
-import LinearGradient from 'react-native-linear-gradient';
+import React from "react";
+import LinearGradient from "react-native-linear-gradient";
 import {
   ActivityIndicator,
   Pressable,
@@ -9,14 +9,14 @@ import {
   TextStyle,
   View,
   ViewStyle,
-} from 'react-native';
-import { useThemeColor } from '@/hooks/useThemeColor';
-import { radii, sizes, spacing } from '@/theme/tokens';
-import { Text } from './Text';
+} from "react-native";
+import { useThemeColor } from "@/hooks/useThemeColor";
+import { hp, wp } from "@/utils/responsive.utils";
+import { Text } from "./Text";
 
-export type ButtonProps = Omit<PressableProps, 'style' | 'children'> & {
+export type ButtonProps = Omit<PressableProps, "style" | "children"> & {
   title: string;
-  variant?: 'primary' | 'secondary' | 'outline' | 'brand';
+  variant?: "primary" | "secondary" | "outline" | "brand";
   loading?: boolean;
   style?: StyleProp<ViewStyle>;
   textStyle?: StyleProp<TextStyle>;
@@ -27,7 +27,7 @@ export type ButtonProps = Omit<PressableProps, 'style' | 'children'> & {
 
 export function Button({
   title,
-  variant = 'primary',
+  variant = "primary",
   loading = false,
   disabled,
   style,
@@ -40,12 +40,13 @@ export function Button({
 }: ButtonProps) {
   const colors = useThemeColor();
   const unavailable = disabled || loading;
-  const foreground =
-    variant === 'brand'
-      ? colors.onBrandAccent
-      : variant === 'primary'
-      ? colors.onPrimary
-      : colors.textPrimary;
+  const foreground = unavailable
+    ? colors.textSecondary
+    : variant === "brand"
+    ? colors.onBrandAccent
+    : variant === "primary"
+    ? colors.onPrimary
+    : colors.textPrimary;
   return (
     <Pressable
       {...props}
@@ -61,15 +62,15 @@ export function Button({
         {
           backgroundColor: unavailable
             ? colors.disabled
-            : variant === 'brand'
+            : variant === "brand"
             ? colors.brandAccent
-            : variant === 'primary'
+            : variant === "primary"
             ? colors.primary
-            : variant === 'secondary'
+            : variant === "secondary"
             ? colors.surfaceRaised
             : colors.transparent,
           borderColor:
-            variant === 'outline' ? colors.border : colors.transparent,
+            variant === "outline" ? colors.border : colors.transparent,
           opacity: pressed ? activeOpacity : 1,
         },
         style,
@@ -92,7 +93,7 @@ export function Button({
   );
 }
 
-export type IconButtonProps = Omit<ButtonProps, 'title' | 'textStyle'> & {
+export type IconButtonProps = Omit<ButtonProps, "title" | "textStyle"> & {
   accessibilityLabel: string;
   icon: React.ReactNode;
 };
@@ -139,23 +140,23 @@ export function IconButton({
 
 const styles = StyleSheet.create({
   button: {
-    minHeight: sizes.touchTarget,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    borderRadius: radii.md,
+    minHeight: Math.max(48, hp("6%")),
+    paddingHorizontal: wp("4%"),
+    paddingVertical: hp("1%"),
+    borderRadius: wp("3%"),
     borderWidth: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing.sm,
-    overflow: 'hidden',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: wp("2%"),
+    overflow: "hidden",
   },
-  label: { fontWeight: '600', flexShrink: 1, textAlign: 'center' },
+  label: { fontWeight: "600", flexShrink: 1, textAlign: "center" },
   iconButton: {
-    minWidth: sizes.touchTarget,
-    minHeight: sizes.touchTarget,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: radii.md,
+    minWidth: Math.max(48, wp("12%")),
+    minHeight: Math.max(48, wp("12%")),
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: wp("3%"),
   },
 });

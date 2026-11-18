@@ -1,12 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { Button, SafeAreaWrapper, Text } from '@/components/ui';
+import { Button, Text } from '@/components/ui';
+import AppBackground from '@/components/background/AppBackground';
 import BrandLogo from '@/components/layouts/auth/BrandLogo';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
+import type { themeType } from '@/interface/theme.type';
+import { useThemedStyles } from '@/hooks/useThemedStyles';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { TSplashStackProps } from '@/interface/navigation.type';
 import { readStartupDestination } from '@/service/startup';
-import { spacing } from '@/theme/tokens';
+import { wp } from '@/utils/responsive.utils';
 import { logger } from '@/utils/logger';
 
 export function SplashContent({
@@ -17,12 +20,10 @@ export function SplashContent({
   onRetry?: () => void;
 }) {
   const colors = useThemeColor();
+  const styles = useThemedStyles(createStyle);
   const { t } = useAppTranslation();
   return (
-    <SafeAreaWrapper
-      statusBarColor={colors.surface}
-      style={{ backgroundColor: colors.surface }}
-    >
+    <AppBackground backgroundColor={colors.surface} style={styles.container}>
       <View style={styles.center} testID="splash-screen">
         <BrandLogo />
       </View>
@@ -34,7 +35,7 @@ export function SplashContent({
           <Button variant="brand" title={t('ui.retry')} onPress={onRetry} />
         </View>
       )}
-    </SafeAreaWrapper>
+    </AppBackground>
   );
 }
 
@@ -48,7 +49,7 @@ export default function SplashScreen({
   useEffect(() => {
     let active = true;
     setFailed(false);
-    // Preserve the existing branded transition before entering the starter Home.
+    // Preserve the branded transition before entering the auth preview.
     const timer = setTimeout(() => {
       readStartupDestination()
         .then(destination => {
@@ -79,12 +80,14 @@ export default function SplashScreen({
   );
 }
 
-const styles = StyleSheet.create({
-  center: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: spacing.lg,
-  },
-  recovery: { padding: spacing.lg, gap: spacing.md },
-});
+const createStyle = (theme: themeType) =>
+  StyleSheet.create({
+    container: { backgroundColor: theme.surface },
+    center: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: wp('6%'),
+    },
+    recovery: { padding: wp('6%'), gap: wp('4%') },
+  });

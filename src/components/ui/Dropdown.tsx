@@ -7,7 +7,7 @@ import {
   ViewStyle,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { spacing } from '@/theme/tokens';
+import { wp } from '@/utils/responsive.utils';
 import { Button } from './Button';
 import { BottomSheet } from './Modal';
 import { RadioButton } from './SelectionControls';
@@ -108,6 +108,6 @@ export function Dropdown({
 }
 
 const styles = StyleSheet.create({
-  wrapper: { gap: spacing.xs },
+  wrapper: { gap: wp('1%') },
   withTrailingIcon: { flexDirection: 'row-reverse' },
 });

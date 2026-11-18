@@ -1,4 +1,5 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
+import { ScaledText as Text } from '@/components/ui/Typography';
 import React from 'react';
 import { themeType } from '@/interface/theme.type';
 import { fontFamily, fontSize } from '@/utils/fontIcon.utils';

@@ -1,28 +1,24 @@
-import {
-  StyleProp,
-  StyleSheet,
-  Text,
-  TextStyle,
-  TouchableOpacity,
-  View,
-  ViewStyle,
-} from 'react-native';
+import { StyleProp, StyleSheet, TextStyle, TouchableOpacity, View, ViewStyle } from 'react-native';
+import { ScaledText as Text } from '@/components/ui/Typography';
 import React from 'react';
 import { navigateBack } from '@/utils/navigation.utils';
-import { Ionicons, fontFamily, fontSize } from '@/utils/fontIcon.utils';
+import { Ionicons } from '@/utils/fontIcon.utils';
+import { fSize, hp, wp } from '@/utils/responsive.utils';
 import { themeType } from '@/interface/theme.type';
-import { hp, wp } from '@/utils/responsive.utils';
 import LinearGradient from 'react-native-linear-gradient';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { useThemedStyles } from '@/hooks/useThemedStyles';
+import { useAppTranslation } from '@/hooks/useAppTranslation';
 
 interface StackHeaderProps {
   title?: string;
   subtitle?: string;
   onBackPress?: () => void;
   style?: StyleProp<ViewStyle>;
-  titleStyle?: TextStyle;
+  titleStyle?: StyleProp<TextStyle>;
+  subtitleStyle?: StyleProp<TextStyle>;
   showBackIcon?: boolean;
+  showDivider?: boolean;
 }
 
 export default function StackHeader({
@@ -31,46 +27,55 @@ export default function StackHeader({
   onBackPress,
   style,
   titleStyle,
+  subtitleStyle,
   showBackIcon = true,
+  showDivider = true,
 }: StackHeaderProps) {
   const styles = useThemedStyles(createStyle);
   const themeColor = useThemeColor();
+  const { t } = useAppTranslation();
 
   return (
     <View style={[styles.headerContainer, style]}>
       <View style={styles.contentRow}>
         {showBackIcon && (
           <TouchableOpacity
+            accessibilityRole="button"
+            accessibilityLabel={t('ui.back')}
             style={styles.backButton}
             onPress={onBackPress ? onBackPress : () => navigateBack()}
             activeOpacity={0.7}
           >
             <Ionicons
               name="arrow-back"
-              size={fontSize.f20}
-              color={themeColor.secondary}
+              size={wp('6%')}
+              color={themeColor.textPrimary}
             />
           </TouchableOpacity>
         )}
-        <View style={styles.titleContainer}>
-          <Text style={[styles.title, titleStyle]}>{title}</Text>
+        <View
+          style={[styles.titleContainer, !showBackIcon && styles.withoutBack]}
+        >
+          <Text accessibilityRole="header" style={[styles.title, titleStyle]}>
+            {title}
+          </Text>
           {subtitle !== '' && (
-            <Text style={[styles.subtitle, { color: themeColor.textS2 }]}>
-              {subtitle}
-            </Text>
+            <Text style={[styles.subtitle, subtitleStyle]}>{subtitle}</Text>
           )}
         </View>
       </View>
-      <LinearGradient
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 0 }}
-        colors={[
-          themeColor.transparent,
-          themeColor.border,
-          themeColor.transparent,
-        ]}
-        style={styles.bottomLine}
-      />
+      {showDivider && (
+        <LinearGradient
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+          colors={[
+            themeColor.transparent,
+            themeColor.border,
+            themeColor.transparent,
+          ]}
+          style={styles.bottomLine}
+        />
+      )}
     </View>
   );
 }
@@ -78,7 +83,7 @@ export default function StackHeader({
 const createStyle = (theme: themeType) =>
   StyleSheet.create({
     headerContainer: {
-      paddingHorizontal: wp('5%'),
+      paddingHorizontal: wp('6%'),
       paddingVertical: hp('2%'),
     },
     contentRow: {
@@ -86,10 +91,10 @@ const createStyle = (theme: themeType) =>
       alignItems: 'center',
     },
     backButton: {
-      width: 48,
-      height: 48,
-      borderRadius: 15,
-      backgroundColor: theme.backgroundColorS1,
+      width: Math.max(48, wp('12%')),
+      height: Math.max(48, wp('12%')),
+      borderRadius: wp('3%'),
+      backgroundColor: theme.surface,
       justifyContent: 'center',
       alignItems: 'center',
       elevation: 4,
@@ -99,22 +104,25 @@ const createStyle = (theme: themeType) =>
       shadowRadius: 5,
     },
     titleContainer: {
-      marginLeft: 15,
+      flex: 1,
+      marginLeft: wp('4%'),
       justifyContent: 'center',
     },
+    withoutBack: { marginLeft: 0 },
     title: {
-      fontSize: fontSize.f18,
-      fontFamily: fontFamily.bold,
-      color: theme.secondary,
+      fontSize: fSize(2.25),
+      fontWeight: '700',
+      color: theme.textPrimary,
     },
     subtitle: {
-      fontSize: fontSize.f12,
-      fontFamily: fontFamily.medium,
-      marginTop: -2,
+      color: theme.textSecondary,
+      fontSize: fSize(1.5),
+      fontWeight: '500',
+      marginTop: hp('0.5%'),
     },
     bottomLine: {
       height: 1.5,
-      width: wp('100%'),
+      width: '100%',
       position: 'absolute',
       bottom: 0,
       alignSelf: 'center',

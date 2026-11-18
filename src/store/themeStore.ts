@@ -1,7 +1,12 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Appearance } from 'react-native';
 import { create } from 'zustand';
-import { ResolvedTheme, ThemeColors, ThemeMode, themes } from '@/theme/colors';
+import type {
+  ResolvedTheme,
+  ThemeColors,
+  ThemeMode,
+} from '@/interface/theme.type';
+import { themes } from '@/utils/theme.utils';
 import { logger } from '@/utils/logger';
 
 const STORAGE_KEY = 'theme-storage';
@@ -73,7 +78,10 @@ export const useThemeStore = create<ThemeStore>((set, get) => ({
   },
   toggleTheme: () => get().setPreference(get().isDarkTheme ? 'light' : 'dark'),
   setSystemTheme: scheme => {
-    const next = resolveTheme(get().preference, scheme === 'dark' ? 'dark' : 'light');
+    const next = resolveTheme(
+      get().preference,
+      scheme === 'dark' ? 'dark' : 'light',
+    );
     if (next.resolvedTheme !== get().resolvedTheme) {
       set(next);
     }
@@ -104,7 +112,9 @@ export function initializeTheme(): Promise<void> {
     initialization = (async () => {
       try {
         const raw = await AsyncStorage.getItem(STORAGE_KEY);
-        const preference = raw ? readThemePreference(JSON.parse(raw)) : 'system';
+        const preference = raw
+          ? readThemePreference(JSON.parse(raw))
+          : 'system';
         if (preferenceRevision === revisionAtStart) {
           useThemeStore.setState({ preference, ...resolveTheme(preference) });
         }

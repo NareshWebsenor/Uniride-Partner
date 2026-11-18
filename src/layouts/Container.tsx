@@ -1,6 +1,6 @@
 import React from 'react';
 import { StyleSheet, View, ViewProps } from 'react-native';
-import { sizes, spacing } from '@/theme/tokens';
+import { wp } from '@/utils/responsive.utils';
 
 export function Container({ style, ...props }: ViewProps) {
   return <View {...props} style={[styles.container, style]} />;
@@ -9,9 +9,9 @@ export function Container({ style, ...props }: ViewProps) {
 const styles = StyleSheet.create({
   container: {
     width: '100%',
-    maxWidth: sizes.maxContentWidth,
+    maxWidth: 720,
     alignSelf: 'center',
-    padding: spacing.md,
-    gap: spacing.md,
+    padding: wp('4%'),
+    gap: wp('4%'),
   },
 });

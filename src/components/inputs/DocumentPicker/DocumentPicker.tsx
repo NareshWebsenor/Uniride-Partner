@@ -1,5 +1,6 @@
 import { logger } from '@/utils/logger';
-import { StyleSheet, Text, View, Pressable, ViewStyle } from 'react-native';
+import { StyleSheet, View, Pressable, ViewStyle } from 'react-native';
+import { ScaledText as Text } from '@/components/ui/Typography';
 import React from 'react';
 import { themeType } from '@/interface/theme.type';
 import { fontFamily, fontSize, Ionicons, Entypo } from '@/utils/fontIcon.utils';

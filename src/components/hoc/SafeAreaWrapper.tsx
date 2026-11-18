@@ -1,5 +1,6 @@
 import { useThemeStore } from '@/store/themeStore';
 import { useThemeColor } from '@/hooks/useThemeColor';
+import { statusBarStyleForColor } from '@/utils/theme.utils';
 import React from 'react';
 import { View, StyleSheet, ViewStyle, StatusBar } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -28,7 +29,9 @@ const SafeAreaWrapper = ({
     <View style={[styles.outer, { backgroundColor }]}>
       <StatusBar
         backgroundColor={backgroundColor}
-        barStyle={StatusBarStyle ?? (isDarkTheme ? 'light-content' : 'dark-content')}
+        barStyle={
+          StatusBarStyle ?? statusBarStyleForColor(backgroundColor, isDarkTheme)
+        }
         translucent={!useSafeArea} // Key for Android 33+
       />
       <Wrapper style={[styles.container, style]}>{children}</Wrapper>

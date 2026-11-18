@@ -1,15 +1,25 @@
 import React, { useState } from 'react';
-import { TextInputProps, TextStyle, View, ViewStyle } from 'react-native';
+import {
+  StyleProp,
+  StyleSheet,
+  TextInputProps,
+  TextStyle,
+  View,
+  ViewStyle,
+} from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@/utils/fontIcon.utils';
+import type { themeType } from '@/interface/theme.type';
+import { useThemedStyles } from '@/hooks/useThemedStyles';
 import { useThemeColor } from '@/hooks/useThemeColor';
-import { sizes } from '@/theme/tokens';
+import { fSize, hp, wp } from '@/utils/responsive.utils';
+import { Text } from '@/components/ui/Text';
 import { IconButton } from '@/components/ui/Button';
 import { TextInput } from '@/components/ui/TextInput';
 
 type Props = TextInputProps & {
   name?: string;
-  placeholder: string;
+  placeholder?: string;
   errorMsg?: string;
   label?: string;
   iconName?: string;
@@ -18,8 +28,10 @@ type Props = TextInputProps & {
   InputStyle?: TextStyle;
   onChangeText: (value: string) => void;
   isEditable?: boolean;
-  containerStyle?: ViewStyle;
-  style?: ViewStyle;
+  containerStyle?: StyleProp<ViewStyle>;
+  style?: StyleProp<ViewStyle>;
+  left?: React.ReactNode;
+  otpLength?: number;
   value: string;
   onClose?: () => void;
   isRequired?: boolean;
@@ -43,13 +55,65 @@ export default function CustomTextInput({
   labelStyle,
   leftIconStyle,
   secureTextEntry,
+  left,
+  otpLength,
+  onFocus,
+  onBlur,
   ...props
 }: Props) {
   const colors = useThemeColor();
+  const styles = useThemedStyles(createStyle);
   const { t } = useTranslation();
   const secure =
     secureTextEntry ?? name?.toLowerCase().includes('password') ?? false;
   const [visible, setVisible] = useState(false);
+  const [focused, setFocused] = useState(false);
+  if (otpLength) {
+    return (
+      <View style={[styles.row, style]}>
+        {Array.from({ length: otpLength }, (_, index) => (
+          <View
+            key={index}
+            accessible={false}
+            style={[
+              styles.cell,
+              focused &&
+                index === Math.min(props.value.length, otpLength - 1) &&
+                styles.focusedCell,
+            ]}
+          >
+            <Text importantForAccessibility="no" style={styles.digit}>
+              {props.value[index] ?? ''}
+            </Text>
+          </View>
+        ))}
+        <TextInput
+          {...props}
+          editable={isEditable}
+          maxLength={otpLength}
+          keyboardType="number-pad"
+          textContentType="oneTimeCode"
+          autoComplete="one-time-code"
+          caretHidden
+          onChangeText={value =>
+            props.onChangeText(value.replace(/\D/g, '').slice(0, otpLength))
+          }
+          onFocus={event => {
+            setFocused(true);
+            onFocus?.(event);
+          }}
+          onBlur={event => {
+            setFocused(false);
+            onBlur?.(event);
+          }}
+          containerStyle={StyleSheet.absoluteFill}
+          fieldStyle={styles.hiddenField}
+          style={styles.hiddenInput}
+          selectionColor={colors.transparent}
+        />
+      </View>
+    );
+  }
   return (
     <View style={style}>
       <TextInput
@@ -62,15 +126,18 @@ export default function CustomTextInput({
         style={InputStyle}
         fieldStyle={containerStyle}
         labelStyle={labelStyle}
+        onFocus={onFocus}
+        onBlur={onBlur}
         left={
-          iconName ? (
+          left ??
+          (iconName ? (
             <Ionicons
               name={iconName as React.ComponentProps<typeof Ionicons>['name']}
-              size={sizes.icon}
+              size={wp('6%')}
               color={colors.primary}
               style={leftIconStyle}
             />
-          ) : null
+          ) : null)
         }
         right={
           secure ? (
@@ -82,7 +149,7 @@ export default function CustomTextInput({
               icon={
                 <Ionicons
                   name={visible ? 'eye-off' : 'eye'}
-                  size={sizes.icon}
+                  size={wp('6%')}
                   color={colors.textSecondary}
                 />
               }
@@ -94,7 +161,7 @@ export default function CustomTextInput({
               icon={
                 <Ionicons
                   name="close-circle"
-                  size={sizes.icon}
+                  size={wp('6%')}
                   color={colors.textSecondary}
                 />
               }
@@ -105,3 +172,25 @@ export default function CustomTextInput({
     </View>
   );
 }
+
+const createStyle = (theme: themeType) =>
+  StyleSheet.create({
+    row: { flexDirection: 'row', gap: wp('4%'), alignSelf: 'flex-start' },
+    cell: {
+      borderColor: theme.border,
+      width: wp('12%'),
+      minHeight: Math.max(48, hp('7%')),
+      borderWidth: 1,
+      borderRadius: wp('5%'),
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    digit: { fontSize: fSize(3), fontWeight: '700' },
+    focusedCell: { borderColor: theme.primary },
+    hiddenInput: { color: theme.transparent, opacity: 0 },
+    hiddenField: {
+      borderWidth: 0,
+      minHeight: Math.max(48, hp('7%')),
+      backgroundColor: theme.transparent,
+    },
+  });

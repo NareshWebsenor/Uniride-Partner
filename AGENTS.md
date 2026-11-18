@@ -37,7 +37,9 @@ Repo folder UniRide hai; existing registered app identity BharatTalk hai.
   Legacy Redux modules ko same preference ke second source mein mat badlo.
 - `src/constants`, `src/utils`, `src/interface`: constants, pure utilities,
   shared types. Existing type paths ko preserve karo.
-- `src/theme`: theme colors, design tokens, native/navigation integration.
+- Theme palettes, `ThemeProvider` aur navigation theme factory
+  `src/utils/theme.utils.ts` mein hain. Provider ko Zustand values/callback
+  `App.tsx` se do; utility mein store import karke circular dependency mat banao.
 - `src/localizations`: i18n setup, `en/translation.json`, `hi/translation.json`.
 - `src/assets`: existing images, fonts, audio, video aur theme-aware SVG assets.
 - Har file single responsibility rakhe; ideally <300 lines, >500 sirf documented
@@ -49,7 +51,8 @@ Repo folder UniRide hai; existing registered app identity BharatTalk hai.
 
 ## Mandatory theme rules
 
-- UI ke saare colors `src/theme/colors.ts` mein centralized hon.
+- UI ke saare colors `src/utils/theme.utils.ts` mein centralized hon.
+  Shared color interfaces `src/interface/theme.type.ts` mein rakho.
 - Components, screens, layouts, navigation, SVGs aur styles mein hex, rgb/rgba,
   hsl, named colors ya transparent color literals mat likho.
 - `useTheme()`, `useThemeColor()` ya `useThemedStyles()` use karo.
@@ -61,7 +64,10 @@ Repo folder UniRide hai; existing registered app identity BharatTalk hai.
   new UI semantic tokens use kare.
 - Light aur Dark mein same token contract mandatory. Brand changes centralized
   palette mein karo; per-screen palette ya second provider mat banao.
-- `src/theme/tokens.ts` se spacing, typography, radius aur sizes lo.
+- `src/utils/responsive.utils.ts` ke `wp`, `hp`, `fSize` directly use karo:
+  horizontal spacing/radius/square icons ke liye `wp`, vertical lengths ke liye
+  `hp`, fonts ke liye percentage-based `fSize`. Sizing-token objects mat banao.
+  Content max-width caps, zero, hairline borders aur pill radius fixed reh sakte hain.
 - `src/store/themeStore.ts` theme preference ka single owner hai:
   `light | dark | system`; resolved palette persist mat karo.
 - System events sirf System selection ko affect karein; explicit selection
@@ -96,12 +102,18 @@ Repo folder UniRide hai; existing registered app identity BharatTalk hai.
 
 ## Reusable UI aur performance
 
+- Har full screen par `AppBackground` directly ya existing `ScreenWrapper` ke
+  through use karo. Nested forms/steps parent wrapper inherit karein; double
+  safe-area padding aur repeated status-bar wrappers mat add karo.
 - Naya Button/Input/Card banane se pehle `src/components/ui` aur existing
   components inspect karo. Existing names canonical implementation ko adapt karein.
 - Public props typed/configurable hon; callbacks aur accessibility state expose
   karo. Loading/disabled button repeated action block kare.
-- Minimum interactive target shared `sizes.touchTarget` se lo.
+- Interactive dimensions minimum 48dp rakho, jaise `Math.max(48, hp('6%'))`;
+  square buttons mein dono axes par same `Math.max(48, wp('12%'))` use karo.
 - Modal/backdrop/back-button dismissal aur keyboard/safe-area behavior verify karo.
+- Keyboard avoidance ke liye `react-native-keyboard-controller` ka
+  `KeyboardAvoidingView` use karo; root `KeyboardProvider` reuse karo.
 - Component business API calls ya independent preference persistence na kare.
 - Errors/loading/empty states explicit hon; render ke andar side effects mat karo.
 
@@ -147,5 +159,14 @@ Repo folder UniRide hai; existing registered app identity BharatTalk hai.
   publish mat karo.
 - Architecture, flows, tradeoffs, edge cases aur setup/recovery `docs/` mein
   update karo. Existing README onboarding link maintain karo.
+- Feature docs mein stable module numbering mandatory hai:
+  **Module 1 — Splash aur Biometric**, **Module 2 — Auth Flow**; naye feature
+  modules ko Module 3, Module 4, ... do. Existing IDs renumber mat karo.
+  Related/supporting guides apne parent module ka number use karein.
+- Feature-doc title aur cross-links mein module number/name mention karo;
+  `docs/starter-setup.md` ka module index aur README links update rakho.
+  Shared setup/theme/build docs ko feature-module IDs invent karke assign mat karo.
+  Module number se feature active assume mat karo; active/preview/deferred status
+  actual code ke mutabik explicitly mention karo.
 - Final report mein changed files/groups, why, verification commands/evidence
   aur remaining issues/questions concise do; unrun checks ko passed mat bolo.

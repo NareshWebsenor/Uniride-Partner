@@ -7,10 +7,10 @@ import {
   TextStyle,
   ViewStyle,
 } from 'react-native';
-import { Button } from '@/components/ui/Button';
-import { spacing } from '@/theme/tokens';
+import { Button, ButtonProps } from '@/components/ui/Button';
+import { hp } from '@/utils/responsive.utils';
 
-type Props = {
+type Props = Omit<ButtonProps, 'icon' | 'onPress'> & {
   title: string;
   activeOpacity?: number;
   loading?: boolean;
@@ -19,6 +19,7 @@ type Props = {
   textStyle?: StyleProp<TextStyle>;
   onPress: () => void;
   icon?: boolean;
+  iconContent?: React.ReactNode;
   img?: ImageSourcePropType;
   isGradiantRequired?: boolean;
 };
@@ -33,20 +34,24 @@ export default function CustomButton({
   img,
   activeOpacity,
   isGradiantRequired = true,
+  iconContent,
+  disabled,
+  ...props
 }: Props) {
   return (
     <Button
+      {...props}
       title={title}
       loading={loading}
-      disabled={disable}
+      disabled={disable || disabled}
       style={[styles.button, style]}
       textStyle={textStyle}
       onPress={onPress}
       activeOpacity={activeOpacity}
       gradient={isGradiantRequired}
-      icon={img ? <Image source={img} /> : undefined}
+      icon={iconContent ?? (img ? <Image source={img} /> : undefined)}
     />
   );
 }
 
-const styles = StyleSheet.create({ button: { marginTop: spacing.md } });
+const styles = StyleSheet.create({ button: { marginTop: hp('2%') } });

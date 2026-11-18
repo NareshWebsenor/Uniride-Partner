@@ -1,12 +1,6 @@
 import { logger } from '@/utils/logger';
-import {
-  Platform,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-  ViewStyle,
-} from 'react-native';
+import { Platform, Pressable, StyleSheet, View, ViewStyle } from 'react-native';
+import { ScaledText as Text } from '@/components/ui/Typography';
 import React, { useRef } from 'react';
 import BottomSheet from '@/components/bottomSheets/BottomSheet';
 import {

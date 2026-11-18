@@ -1,13 +1,5 @@
-import {
-  Platform,
-  StyleSheet,
-  Text,
-  TextInput,
-  TextInputProps,
-  TextStyle,
-  View,
-  ViewStyle,
-} from 'react-native';
+import { Platform, StyleSheet, TextInputProps, TextStyle, View, ViewStyle } from 'react-native';
+import { ScaledText as Text, ScaledTextInput as TextInput } from '@/components/ui/Typography';
 import React from 'react';
 import ErrorText from '@/components/layouts/error/ErrorText';
 import { themeType } from '@/interface/theme.type';

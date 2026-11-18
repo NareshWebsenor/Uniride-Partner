@@ -1,13 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import React, { useMemo, useState } from 'react';
-import {
-  FlatList,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { FlatList, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { ScaledText as Text, ScaledTextInput as TextInput } from '@/components/ui/Typography';
 import { BottomSheet } from '@/components';
 import { countryData, ICountry } from '@/utils/countryData';
 import { themeType } from '@/interface/theme.type';

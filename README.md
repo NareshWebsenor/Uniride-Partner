@@ -1,9 +1,15 @@
 This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
 
-New-project starter: same splash, simple Home, theme/language settings.
-Login/signup/OTP and old tabs removed; biometric source preserved for later integration.
-[Starter setup and validation](docs/starter-setup.md) ·
-[Preserved biometric implementation](docs/biometric-app-lock.md).
+Partner UI preview: splash → login/register → email OTP → mobile → password → terms → Home.
+Auth is UI-only; no email delivery, server verification or session creation. Biometric source remains deferred.
+[Module index aur shared setup](docs/starter-setup.md) ·
+[Module 1 — Splash aur Biometric](docs/starter-setup.md#module-1--splash-aur-biometric) ·
+[Module 1 — Biometric implementation](docs/biometric-app-lock.md) ·
+[Module 1 — Biometric integration guide](docs/fingerprint-lock-integration.md) ·
+[Module 2 — Auth Flow](docs/auth-flow.md) ·
+[Module 3 — Driver Onboarding](docs/driver-onboarding.md) ·
+[Module 4 — Home aur Bottom Tabs](docs/main-tabs.md) ·
+[Module 4 — Text Size](docs/text-size.md).
 
 # Getting Started
 

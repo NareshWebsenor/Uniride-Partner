@@ -1,32 +1,59 @@
 import { StyleSheet, View } from 'react-native';
-import React from 'react';
-import { themeType } from '@/interface';
+import React, { useCallback } from 'react';
+import type {
+  AppBackgroundProps,
+  AppBackgroundStyleOptions,
+  themeType,
+} from '@/interface';
 import { useThemedStyles } from '@/hooks/useThemedStyles';
-import { ReactNode } from 'react';
 import SafeAreaWrapper from '../hoc/SafeAreaWrapper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useThemeColor } from '@/hooks/useThemeColor';
 
-export default function AppBackground({ children }: { children: ReactNode }) {
-  const styles = useThemedStyles(createStyle);
-  const { top, bottom } = useSafeAreaInsets();
+export default function AppBackground({
+  children,
+  style,
+  backgroundColor,
+  extendUnderStatusBar = false,
+}: AppBackgroundProps) {
+  const { top, bottom, left, right } = useSafeAreaInsets();
+  const colors = useThemeColor();
+  const themedStyle = useCallback(
+    (theme: themeType) =>
+      createStyle(theme, {
+        top: extendUnderStatusBar ? 0 : top,
+        bottom,
+        left,
+        right,
+        backgroundColor,
+      }),
+    [top, bottom, left, right, backgroundColor, extendUnderStatusBar],
+  );
+  const styles = useThemedStyles(themedStyle);
   return (
-    <SafeAreaWrapper useSafeArea={false} StatusBarStyle="dark-content">
-      <View
-        style={[
-          styles.gradiantBackground,
-          { paddingTop: top, paddingBottom: bottom },
-        ]}
-      >
-        {children}
-      </View>
+    <SafeAreaWrapper
+      useSafeArea={false}
+      statusBarColor={
+        extendUnderStatusBar ? colors.transparent : backgroundColor
+      }
+      StatusBarStyle={extendUnderStatusBar ? 'light-content' : undefined}
+    >
+      <View style={[styles.container, style]}>{children}</View>
     </SafeAreaWrapper>
   );
 }
 
-const createStyle = (themeColor: themeType) =>
+const createStyle = (
+  theme: themeType,
+  { top, bottom, left, right, backgroundColor }: AppBackgroundStyleOptions,
+) =>
   StyleSheet.create({
-    gradiantBackground: {
+    container: {
       flex: 1,
-      backgroundColor: themeColor.backgroundColor,
+      paddingTop: top,
+      paddingBottom: bottom,
+      paddingLeft: left,
+      paddingRight: right,
+      backgroundColor: backgroundColor ?? theme.background,
     },
   });

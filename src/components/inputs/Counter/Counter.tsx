@@ -1,4 +1,5 @@
-import { Pressable, StyleSheet, Text, View, ViewStyle } from 'react-native';
+import { Pressable, StyleSheet, View, ViewStyle } from 'react-native';
+import { ScaledText as Text } from '@/components/ui/Typography';
 import React from 'react';
 import { Entypo, fontFamily, fontSize } from '@/utils/fontIcon.utils';
 import { fSize } from '@/utils/responsive.utils';

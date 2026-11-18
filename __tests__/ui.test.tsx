@@ -7,7 +7,7 @@ import SettingsScreen from '@/screens/settings/SettingsScreen';
 import i18n from '@/localizations';
 import { initializeLanguage, useLanguageStore } from '@/store/languageStore';
 import { resolveTheme, useThemeStore } from '@/store/themeStore';
-import { darkColors, lightColors } from '@/theme/colors';
+import { darkColors, lightColors } from '@/utils/theme.utils';
 
 jest.mock('@react-navigation/native', () => ({
   useNavigation: () => ({ goBack: jest.fn() }),

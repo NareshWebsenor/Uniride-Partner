@@ -21,6 +21,17 @@ function inspect(file) {
     failures.push(`${file}:${line + 1} ${message}`);
   }
   function visit(node) {
+    if (ts.isImportDeclaration(node) && node.moduleSpecifier.text === 'react-native'
+        && !file.endsWith('/Typography.tsx') && !node.importClause?.isTypeOnly) {
+      const bindings = node.importClause?.namedBindings;
+      if (bindings && ts.isNamedImports(bindings)) {
+        for (const item of bindings.elements) {
+          if (!item.isTypeOnly && ['Text', 'TextInput'].includes((item.propertyName ?? item.name).text)) {
+            report(item, 'Use shared Typography primitives so saved text size applies.');
+          }
+        }
+      }
+    }
     if (ts.isJsxText(node) && /[\p{L}\p{N}]/u.test(node.text)) {
       report(node, 'User-facing text needs a translation key.');
     }

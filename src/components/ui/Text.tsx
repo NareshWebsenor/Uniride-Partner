@@ -1,11 +1,8 @@
 import React from 'react';
-import {
-  StyleSheet,
-  Text as NativeText,
-  TextProps as NativeTextProps,
-} from 'react-native';
+import { StyleSheet, TextProps as NativeTextProps } from 'react-native';
+import { ScaledText as NativeText } from '@/components/ui/Typography';
 import { useThemeColor } from '@/hooks/useThemeColor';
-import { typography } from '@/theme/tokens';
+import { fSize } from '@/utils/responsive.utils';
 
 export type TextProps = NativeTextProps & {
   variant?: 'body' | 'caption' | 'subtitle';
@@ -28,7 +25,18 @@ export function Text({
   return (
     <NativeText
       {...props}
-      style={[{ color: toneColor[tone], fontSize: typography[variant] }, style]}
+      style={[
+        {
+          color: toneColor[tone],
+          fontSize:
+            variant === 'caption'
+              ? fSize(1.5)
+              : variant === 'subtitle'
+              ? fSize(2.25)
+              : fSize(2),
+        },
+        style,
+      ]}
     />
   );
 }
@@ -48,11 +56,7 @@ export function Heading({
         {
           color: colors.textPrimary,
           fontSize:
-            level === 1
-              ? typography.hero
-              : level === 2
-              ? typography.title
-              : typography.subtitle,
+            level === 1 ? fSize(4) : level === 2 ? fSize(3) : fSize(2.25),
         },
         style,
       ]}

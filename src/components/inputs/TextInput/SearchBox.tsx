@@ -5,7 +5,7 @@ import { SearchInput } from '@/components/ui/TextInput';
 import { IconButton } from '@/components/ui/Button';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { Ionicons } from '@/utils/fontIcon.utils';
-import { sizes, spacing } from '@/theme/tokens';
+import { wp } from '@/utils/responsive.utils';
 
 type Props = {
   value: string;
@@ -44,7 +44,7 @@ export default function SearchBox({
           accessibilityLabel={t('ui.filter')}
           onPress={onFilterPress}
           icon={
-            <Ionicons name="options" size={sizes.icon} color={colors.primary} />
+            <Ionicons name="options" size={wp('6%')} color={colors.primary} />
           }
         />
       ) : null}
@@ -52,6 +52,6 @@ export default function SearchBox({
   );
 }
 const styles = StyleSheet.create({
-  row: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  row: { flexDirection: 'row', alignItems: 'center', gap: wp('2%') },
   input: { flex: 1 },
 });

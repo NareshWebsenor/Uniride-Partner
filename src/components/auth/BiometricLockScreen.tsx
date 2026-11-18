@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { BIOMETRY_TYPE } from 'react-native-keychain';
-import { Alert, Button, Heading, SafeAreaWrapper, Text } from '@/components/ui';
+import { Alert, Button, Heading, Text } from '@/components/ui';
+import AppBackground from '@/components/background/AppBackground';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import type { BiometricFailure } from '@/service/biometricAppLock';
 import { getBiometricAppLockType } from '@/service/biometricAppLock';
-import { radii, sizes, spacing } from '@/theme/tokens';
+import { hp, wp } from '@/utils/responsive.utils';
 import { Ionicons, MaterialDesignIcons } from '@/utils/fontIcon.utils';
 
 type BiometricLockScreenProps = {
@@ -47,10 +48,7 @@ export function BiometricLockScreen({
     biometryType === BIOMETRY_TYPE.FACE;
 
   return (
-    <SafeAreaWrapper
-      statusBarColor={colors.background}
-      style={{ backgroundColor: colors.background }}
-    >
+    <AppBackground backgroundColor={colors.background}>
       <View style={styles.content}>
         <View
           accessible={false}
@@ -62,7 +60,7 @@ export function BiometricLockScreen({
           {isFaceBiometry ? (
             <MaterialDesignIcons
               name="face-recognition"
-              size={sizes.brandMark}
+              size={wp('13%')}
               color={colors.primary}
             />
           ) : (
@@ -73,7 +71,7 @@ export function BiometricLockScreen({
                   ? 'finger-print'
                   : 'lock-closed'
               }
-              size={sizes.brandMark}
+              size={wp('13%')}
               color={colors.primary}
             />
           )}
@@ -83,10 +81,10 @@ export function BiometricLockScreen({
             mode === 'checking'
               ? 'appLock.checkingTitle'
               : biometryType === BIOMETRY_TYPE.FACE_ID
-                ? 'appLock.faceIdTitle'
-                : biometryType === BIOMETRY_TYPE.FACE
-                  ? 'appLock.faceUnlockTitle'
-                  : 'appLock.title',
+              ? 'appLock.faceIdTitle'
+              : biometryType === BIOMETRY_TYPE.FACE
+              ? 'appLock.faceUnlockTitle'
+              : 'appLock.title',
           )}
         </Heading>
         <Text tone="secondary" style={styles.description}>
@@ -94,8 +92,8 @@ export function BiometricLockScreen({
             mode === 'checking'
               ? 'appLock.checking'
               : authenticating
-                ? 'appLock.authenticating'
-                : 'appLock.description',
+              ? 'appLock.authenticating'
+              : 'appLock.description',
           )}
         </Text>
         {error ? (
@@ -120,7 +118,7 @@ export function BiometricLockScreen({
           </View>
         )}
       </View>
-    </SafeAreaWrapper>
+    </AppBackground>
   );
 }
 
@@ -129,18 +127,18 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: spacing.lg,
-    gap: spacing.lg,
+    padding: wp('6%'),
+    gap: wp('6%'),
   },
   icon: {
-    width: sizes.successMark,
-    height: sizes.successMark,
+    width: wp('26%'),
+    height: wp('26%'),
     borderWidth: 1,
-    borderRadius: radii.pill,
+    borderRadius: 999,
     alignItems: 'center',
     justifyContent: 'center',
   },
   title: { textAlign: 'center' },
   description: { textAlign: 'center' },
-  actions: { width: '100%', gap: spacing.md, marginTop: spacing.md },
+  actions: { width: '100%', gap: wp('4%'), marginTop: hp('2%') },
 });

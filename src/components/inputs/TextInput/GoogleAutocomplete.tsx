@@ -2,15 +2,14 @@ import { logger } from '@/utils/logger';
 import { useTranslation } from 'react-i18next';
 import {
   StyleSheet,
-  TextInput,
   View,
   ViewStyle,
   FlatList,
   TouchableOpacity,
-  Text,
   ActivityIndicator,
   Keyboard,
 } from 'react-native';
+import { ScaledTextInput as TextInput, ScaledText as Text } from '@/components/ui/Typography';
 import React, { useCallback, useRef, useEffect, useState } from 'react';
 import { themeType } from '@/interface/theme.type';
 import { fontFamily, fontSize, Ionicons } from '@/utils/fontIcon.utils';

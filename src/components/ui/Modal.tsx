@@ -9,7 +9,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { useThemeColor } from '@/hooks/useThemeColor';
-import { radii, sizes, spacing } from '@/theme/tokens';
+import { hp, wp } from '@/utils/responsive.utils';
 import { Ionicons } from '@/utils/fontIcon.utils';
 import { Button, IconButton } from './Button';
 import { Heading, Text } from './Text';
@@ -35,7 +35,7 @@ export function Modal({
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
   const safeBottomPadding =
-    placement === 'bottom' ? spacing.none : insets.bottom + spacing.md;
+    placement === 'bottom' ? 0 : insets.bottom + hp('2%');
   return (
     <NativeModal
       visible={visible}
@@ -50,7 +50,7 @@ export function Modal({
           placement === 'bottom' && styles.bottomOverlay,
           {
             backgroundColor: colors.overlay,
-            paddingTop: insets.top + spacing.md,
+            paddingTop: insets.top + hp('2%'),
             paddingBottom: safeBottomPadding,
           },
         ]}
@@ -69,7 +69,7 @@ export function Modal({
             {
               backgroundColor: colors.surface,
               paddingBottom:
-                spacing.md + (placement === 'bottom' ? insets.bottom : 0),
+                hp('2%') + (placement === 'bottom' ? insets.bottom : 0),
             },
           ]}
         >
@@ -88,7 +88,7 @@ export function Modal({
                 icon={
                   <Ionicons
                     name="close"
-                    size={sizes.icon}
+                    size={wp('6%')}
                     color={colors.textPrimary}
                   />
                 }
@@ -157,7 +157,7 @@ export function ConfirmationDialog({
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    paddingHorizontal: spacing.md,
+    paddingHorizontal: wp('4%'),
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -165,17 +165,17 @@ const styles = StyleSheet.create({
   panel: {
     maxHeight: '90%',
     width: '100%',
-    maxWidth: sizes.maxContentWidth,
-    padding: spacing.md,
-    borderRadius: radii.lg,
+    maxWidth: 720,
+    padding: wp('4%'),
+    borderRadius: wp('5%'),
     flexShrink: 1,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.sm,
-    marginBottom: spacing.sm,
+    gap: wp('2%'),
+    marginBottom: hp('1%'),
   },
   title: { flex: 1 },
-  content: { gap: spacing.md },
+  content: { gap: wp('4%') },
 });

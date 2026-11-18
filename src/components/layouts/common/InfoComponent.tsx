@@ -11,7 +11,8 @@ import {
   Fontisto,
 } from '@/utils/fontIcon.utils';
 import React, { useMemo } from 'react';
-import { View, Text, StyleSheet, ViewStyle, TextStyle } from 'react-native';
+import { View, StyleSheet, ViewStyle, TextStyle } from 'react-native';
+import { ScaledText as Text } from '@/components/ui/Typography';
 import { useThemedStyles } from '@/hooks/useThemedStyles';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import * as types from '@/interface';

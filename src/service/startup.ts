@@ -2,7 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ASYNC_KEYS } from '@/constants/storage';
 import { useAuthStore } from '@/store/authStore';
 
-export type StartupDestination = { name: 'MainStack' };
+export type StartupDestination = { name: 'LoginScreen' };
 
 function hasStoredToken(raw: string | null): boolean {
   if (!raw?.trim()) {
@@ -48,8 +48,8 @@ export async function hasActiveCustomerSession(): Promise<boolean> {
   return false;
 }
 
-// Login, onboarding and KYC no longer participate in starter navigation.
+// UI preview always starts at auth; it neither creates nor restores a session.
 // Keep the session helper above for the preserved, inactive biometric gate.
 export async function readStartupDestination(): Promise<StartupDestination> {
-  return { name: 'MainStack' };
+  return { name: 'LoginScreen' };
 }

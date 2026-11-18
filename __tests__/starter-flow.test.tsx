@@ -20,7 +20,7 @@ beforeEach(async () => {
 });
 
 test.each([null, 'old-session', '{corrupt'])(
-  'startup opens Home regardless of old session %s and incomplete verification',
+  'startup opens auth preview regardless of old session %s and incomplete verification',
   async token => {
     if (token !== null) {
       await AsyncStorage.multiSet([
@@ -29,12 +29,12 @@ test.each([null, 'old-session', '{corrupt'])(
         [ASYNC_KEYS.IS_KYC_COMPLETED, 'false'],
       ]);
     }
-    expect(await readStartupDestination()).toEqual({ name: 'MainStack' });
+    expect(await readStartupDestination()).toEqual({ name: 'LoginScreen' });
     expect(await AsyncStorage.getItem(ASYNC_KEYS.ACCESS_TOKEN)).toBe(token);
   },
 );
 
-test('same splash resets into Home after its branded transition', async () => {
+test('same splash resets into auth preview after its branded transition', async () => {
   jest.useFakeTimers();
   const reset = jest.fn();
   let tree!: Renderer.ReactTestRenderer;
@@ -54,7 +54,7 @@ test('same splash resets into Home after its branded transition', async () => {
   });
   expect(reset).toHaveBeenCalledWith({
     index: 0,
-    routes: [{ name: 'MainStack' }],
+    routes: [{ name: 'LoginScreen' }],
   });
   await act(async () => {
     tree.unmount();
@@ -62,7 +62,7 @@ test('same splash resets into Home after its branded transition', async () => {
   jest.useRealTimers();
 });
 
-test('Home exposes settings without a login or API request', async () => {
+test('Home keeps its heading; preferences are available in Menu', async () => {
   let tree!: Renderer.ReactTestRenderer;
   await act(async () => {
     tree = Renderer.create(
@@ -71,10 +71,9 @@ test('Home exposes settings without a login or API request', async () => {
       </SafeAreaProvider>,
     );
   });
-  await act(async () => {
-    tree.root.findByType(Button).props.onPress();
-  });
-  expect(mockNavigate).toHaveBeenCalledWith('SettingsScreen');
+  expect(tree.root.findAllByType(Button)).toHaveLength(0);
+  expect(tree.root.findAllByProps({ accessibilityRole: 'header' })
+    .some(header => header.props.children === 'Home')).toBe(true);
   await act(async () => {
     tree.unmount();
   });

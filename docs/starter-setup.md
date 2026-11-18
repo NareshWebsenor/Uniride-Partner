@@ -1,6 +1,57 @@
-# Project starter
+# Project Documentation — Module Index aur Shared Setup
+
+## Module order
+
+Feature documentation hamesha is stable numbering ko follow kare:
+
+1. **Module 1 — Splash aur Biometric**: preference hydration, splash/startup
+   handoff aur local app-lock lifecycle. Splash active hai; biometric gate aur
+   Settings switch abhi deferred/inactive hain.
+   [Splash/startup](#module-1--splash-aur-biometric),
+   [biometric implementation](biometric-app-lock.md),
+   [doosre app mein biometric integration](fingerprint-lock-integration.md).
+2. **Module 2 — Auth Flow**: login/register, email OTP, mobile, password aur terms.
+   Abhi UI preview hai; real authentication API/session creation active nahi hai.
+   [Auth flow aur verification](auth-flow.md).
+3. **Module 3 — Driver Onboarding**: Fleet/Own choice first; Fleet needs only driver
+   documents. Own: city/referral → vehicle type → driver documents → vehicle
+   documents → bank details. UI preview only.
+   [Driver onboarding flow aur validation](driver-onboarding.md).
+4. **Module 4 — Home aur Bottom Tabs**: Home, Trips, Earnings, Inbox, Menu navigation
+   active; Trips/Earnings/Inbox header-only. Menu has demo profile and working
+   theme/language preferences aur saved app-wide text size.
+   [Tab flow aur verification](main-tabs.md).
+   [Module 4 — Text Size](text-size.md).
+
+Current flow: **Module 1 (Splash) → Module 2 (Auth preview)**.
+Login → **Module 4 (Home aur Bottom Tabs)**; registration → **Module 3 (Driver
+Onboarding)** → Module 4. Theme/language controls Menu mein directly available hain.
+Module 1 mein biometric documentation hone ka matlab gate enabled hona nahi hai.
+
+Naye feature modules ko Module 5, Module 6, ... do; existing module IDs renumber
+mat karo. Ek module ke related guides wahi ID use karein. Theme, localization,
+responsive sizing aur build/recovery sab modules ka shared setup hain; har
+supporting document ko naya feature-module number mat do.
+
+## Module 1 — Splash aur Biometric
+
+`App.tsx` theme/language preferences hydrate karta hai aur tab tak `SplashContent`
+dikhata hai. Uske baad `SplashScreen` branded transition ke liye 700ms wait karke
+`src/service/startup.ts` se destination leta hai. Current destination Module 2 ka
+`LoginScreen` hai; startup error par translated retry action available hai.
+
+Biometric implementation aur integration guide isi Module 1 ka part hain. Source
+preserved hai, lekin current startup par native biometric prompt request nahi hota.
+Is documentation update se app-lock runtime enable nahi hota.
 
 ## Current flow
+
+Current startup opens [Module 2 — Auth Flow](auth-flow.md). Registration continues
+to [Module 3 — Driver Onboarding](driver-onboarding.md); login opens Home.
+No real auth API or biometric gate is active. This checkout's Android identity is
+`com.uniride.partner`; use that package when launching the partner app.
+
+## Earlier starter baseline
 
 App preference hydration -> existing Uni Ride splash (700 ms) -> Home -> Settings.
 
@@ -16,7 +67,8 @@ The user's explicit choice is to preserve biometric source without activating it
 switch, even when an existing device has `BIOMETRIC_APP_LOCK_ENABLED=true`.
 No app lock is enforced by this starter.
 
-These files remain byte-for-byte unchanged:
+These files remain deferred. The responsive-sizing migration updates the two
+lock views' dimensions only; biometric behavior remains unchanged:
 
 - `src/components/auth/BiometricAppLockGate.tsx`
 - `src/components/auth/BiometricLockModal.tsx`
@@ -27,14 +79,14 @@ These files remain byte-for-byte unchanged:
 
 The deferred gate still depends on `hasActiveCustomerSession`, `onLogout`, the
 `MainStack` route ID and Application's optional `onRouteChange` prop. Those
-compatibility boundaries remain; `MainStack` now renders Home directly and legacy
+compatibility boundaries remain; `MainStack` now renders Module 4 tabs and legacy
 session cleanup resets to Home. REST/session stores and native Keychain dependencies
 are retained for this source compatibility. OTP request/verification APIs and their
 screens have been removed. The gate must be decoupled from login/session state
 before a future standalone app-lock integration. Existing biometric documentation
 below describes the preserved implementation, not active starter behavior.
 
-## Files and decisions
+## Files and decisions — earlier starter baseline
 
 - `App.tsx`, `src/navigations/Application.tsx`: three root routes only; no active
   biometric gate, auth sheet, version request or connectivity blocking modal.
@@ -51,6 +103,122 @@ below describes the preserved implementation, not active starter behavior.
   BharatTalk. This task preserves the actual native files.
 
 ## Development and recovery
+
+### Shared screen background
+
+`src/components/background/AppBackground.tsx` owns themed background, status bar
+and safe-area padding for full screens. Its typed style options include all four
+insets so portrait and landscape cutouts are respected.
+
+- Module 1: hydration/route splash and the retained biometric lock screen use
+  AppBackground directly. Biometric runtime remains deferred.
+- Module 2: LoginScreen wraps the existing login/register and verification steps
+  once; those nested views inherit its background and safe area.
+- Home/Settings: existing ScreenWrapper delegates its outer frame to AppBackground,
+  preserving ScrollView, keyboard taps, Container spacing and width limits.
+
+Do not place another safe-area wrapper around these screens or their child forms.
+SafeAreaWrapper remains AppBackground's lower-level status-bar adapter with its
+own safe-area padding disabled; AppBackground applies the insets once.
+
+### Theme palette ownership
+
+`src/utils/theme.utils.ts` is the single palette source. The former
+`src/theme/colors.ts` module has been removed. Add/edit colors in `lightPalette`
+and `darkPalette`; `LightThemeColors` and `DarkThemeColors` complete the shared
+contract with semantic fields and additional UI accents. Existing user-edited
+palette values are retained; missing fields were filled from the previous palette.
+
+Semantic fields reuse matching palette values: `background` follows
+`backgroundColor`, `surface` follows `backgroundColorS1`, `surfaceRaised` follows
+`grayS2`, and text/border/status colors follow their legacy equivalents.
+Light uses white surfaces, pale-gray cards, dark text and blue actions; Dark uses
+dark surfaces and light text. Links and disabled-button labels have corresponding
+contrast in each palette.
+
+Default preference is `system`: without a saved app choice the phone controls
+Light/Dark, and an unavailable OS scheme falls back to Light. Settings → Appearance
+offers Light, Dark and System. Explicit Light/Dark stays pinned across OS changes
+and app restarts; choosing System resumes following the phone. Only the preference
+is persisted under `theme-storage`, never resolved colors. Existing saved choices
+are preserved. `themeStore.ts` owns resolution/persistence; `ThemeProvider` forwards
+OS appearance changes. No second theme preference or forced Light override is added.
+
+Theme correction verification: theme, auth, starter and onboarding state/UI suites
+passed (37 tests); UI rules and diff checks passed. Android emulator showed the
+white/blue Light palette, then switched to Dark when OS night mode changed. OS
+Light was restored after the check. Manual overrides and saved-Dark hydration are
+covered by store tests; iOS was not exercised.
+
+`src/interface/theme.type.ts` owns `ThemeColors`, its `themeType` compatibility
+alias and theme-mode unions, avoiding circular imports. Lowercase palette exports
+are aliases of the same objects. Zustand remains the active preference owner;
+the legacy Redux consumer receives the same palettes without new persistence.
+Navigation and tests import the relocated definitions. Theme hooks and semantic
+color usage in components remain unchanged.
+
+`ThemeProvider` and `createNavigationTheme` also live in `theme.utils.ts`; their
+former files under `src/theme/` are removed. App selects `isDarkTheme` and
+`setSystemTheme` from Zustand and passes them to the provider. This prevents a
+utility-to-store import cycle because the store already imports the palettes.
+Provider props are declared in `src/interface/theme.type.ts`. The provider uses
+React `createElement` so the utility retains its `.ts` extension. Unknown/system
+color-scheme values normalize to light before reaching the existing store callback;
+explicit user preferences still ignore OS changes. Navigation theme behavior and
+palette values remain unchanged.
+
+Provider consolidation checks: App hydration and theme suites pass; full suite
+remains 35 passed / the same eight baseline failures. The provider's earlier
+color-scheme type error is resolved by normalization; type-check now reports only
+the two existing TextArea and CardImageComponent errors. Palette definitions are
+unchanged, removed-file import scan is clean, and UI/diff checks pass. No native
+files changed; device appearance checks were not rerun for this consolidation.
+
+Palette migration verification (2026-11-17): original color values compared
+against the pre-migration snapshot and preserved in both palettes; each completed
+palette has 66 fields and compatibility aliases share the same objects. No source
+or test imports reference the removed module. Theme tests pass; full suite remains
+35 passed / the same eight existing failures. The two incomplete-palette type
+errors are fixed; the three earlier TextArea/CardImageComponent/ThemeProvider
+errors remain. UI rules and diff checks pass. Visual device checks were not rerun
+for this palette change.
+
+### Responsive UI sizing
+
+All former sizing-token consumers now call `wp`, `hp`, and `fSize` from
+`src/utils/responsive.utils.ts` directly. `useTheme()` exposes colors and theme
+preferences only. The sizing token module has been removed.
+
+- Horizontal spacing, radii, and square icons use `wp`; vertical lengths use `hp`.
+- Conversion reference: 400dp width / 800dp height. For example, 16dp horizontal
+  padding becomes `wp('4%')`, and 16dp vertical padding becomes `hp('2%')`.
+  Shared padding/gaps use width scaling so all sides remain equal.
+- Font sizes use percentages: `fSize(2)` is approximately 16dp at an effective
+  800dp font reference height. The installed font library adjusts for platform
+  status-bar/safe-area behavior; `fSize(16)` does **not** mean 16dp.
+  Native text scaling remains enabled.
+- Interactive heights use `Math.max(48, hp('6%'))` or `hp('7%')` with the same
+  48dp floor. Square buttons use width scaling on both axes with a 48dp floor.
+- Fixed 440dp/720dp content-width caps, zero values, hairline/border widths and
+  pill radius remain intentional constraints, not a new sizing-token layer.
+- Existing helper behavior is preserved: module-level styles capture dimensions
+  at initialization. Live rotation/split-window reflow is not added by this change.
+
+Check small/large phones, Hindi wrapping, enlarged fonts, OTP fit, modal dismissal,
+and Light/Dark appearance on a physical device. These remain visual checks, not
+claims inferred from passing unit tests.
+
+Migration validation (2026-11-17):
+
+- Source scan: no remaining sizing-token imports/usages; `git diff --check` and
+  `yarn check:ui` pass.
+- `yarn test --runInBand`: 35 pass, the same eight failures as before migration
+  (four failed suites / five passed). Existing failures cover biometric gate,
+  biometric service, UI assertions, and logout. Jest also reports open handles.
+- `yarn type-check`: the same three errors in TextArea, CardImageComponent and
+  ThemeProvider. No new TypeScript diagnostics.
+- `yarn lint`: existing missing ESLint configuration blocks execution.
+- `adb devices`: no connected device; physical UI verification remains pending.
 
 Prefer a physical wireless Android device:
 

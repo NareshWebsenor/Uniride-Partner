@@ -4,6 +4,22 @@ jest.mock('@react-native-async-storage/async-storage', () =>
 jest.mock('react-native-safe-area-context', () =>
   require('react-native-safe-area-context/jest/mock').default,
 );
+jest.mock('react-native-keyboard-controller', () =>
+  require('react-native-keyboard-controller/jest'),
+);
+jest.mock('@react-native-documents/picker', () => ({
+  pick: jest.fn(),
+  types: { images: 'image/*', pdf: 'application/pdf' },
+  errorCodes: { OPERATION_CANCELED: 'OPERATION_CANCELED' },
+  isErrorWithCode: error => typeof error?.code === 'string',
+}));
+jest.mock('react-native-modal-datetime-picker', () => {
+  const React = require('react');
+  const { View } = require('react-native');
+  return function MockDateTimePicker(props) {
+    return React.createElement(View, props);
+  };
+});
 jest.mock('@/utils/logger', () => ({
   logger: {
     debug: jest.fn(),

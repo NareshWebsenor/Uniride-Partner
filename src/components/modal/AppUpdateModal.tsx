@@ -1,6 +1,7 @@
 import { logger } from '@/utils/logger';
 import { useTranslation } from 'react-i18next';
-import { Linking, Modal, StyleSheet, Text, View } from 'react-native';
+import { Linking, Modal, StyleSheet, View } from 'react-native';
+import { ScaledText as Text } from '@/components/ui/Typography';
 import React from 'react';
 import { CustomButton } from '..';
 import { fontFamily, fontSize } from '@/utils/fontIcon.utils';

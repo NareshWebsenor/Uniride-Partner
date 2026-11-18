@@ -1,7 +1,7 @@
 import React from 'react';
 import { StyleSheet, View, ViewProps } from 'react-native';
 import { useThemeColor } from '@/hooks/useThemeColor';
-import { radii, spacing } from '@/theme/tokens';
+import { wp } from '@/utils/responsive.utils';
 
 export function Card({ style, ...props }: ViewProps) {
   const colors = useThemeColor();
@@ -19,9 +19,9 @@ export function Card({ style, ...props }: ViewProps) {
 
 const styles = StyleSheet.create({
   card: {
-    padding: spacing.md,
-    gap: spacing.md,
+    padding: wp('4%'),
+    gap: wp('4%'),
     borderWidth: 1,
-    borderRadius: radii.lg,
+    borderRadius: wp('5%'),
   },
 });
