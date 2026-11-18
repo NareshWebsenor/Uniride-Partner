@@ -19,9 +19,12 @@ Feature documentation hamesha is stable numbering ko follow kare:
    [Driver onboarding flow aur validation](driver-onboarding.md).
 4. **Module 4 — Home aur Bottom Tabs**: Home, Trips, Earnings, Inbox, Menu navigation
    active; Trips/Earnings/Inbox header-only. Menu has demo profile and working
-   theme/language preferences aur saved app-wide text size.
+   theme/language preferences (English/Hindi/Spanish), saved app-wide text size aur Menu detail screens.
    [Tab flow aur verification](main-tabs.md).
    [Module 4 — Text Size](text-size.md).
+   [Module 4 — Menu Details](menu-details.md).
+   [Module 4 — Home Ride Preview](home-rides.md): availability, 15-second requests,
+   Arriving and OTP/Start Trip; demo data, backend deferred.
 
 Current flow: **Module 1 (Splash) → Module 2 (Auth preview)**.
 Login → **Module 4 (Home aur Bottom Tabs)**; registration → **Module 3 (Driver
@@ -35,7 +38,7 @@ supporting document ko naya feature-module number mat do.
 
 ## Module 1 — Splash aur Biometric
 
-`App.tsx` theme/language preferences hydrate karta hai aur tab tak `SplashContent`
+`App.tsx` theme/language/text-size/notification preferences hydrate karta hai aur tab tak `SplashContent`
 dikhata hai. Uske baad `SplashScreen` branded transition ke liye 700ms wait karke
 `src/service/startup.ts` se destination leta hai. Current destination Module 2 ka
 `LoginScreen` hai; startup error par translated retry action available hai.
@@ -50,6 +53,24 @@ Current startup opens [Module 2 — Auth Flow](auth-flow.md). Registration conti
 to [Module 3 — Driver Onboarding](driver-onboarding.md); login opens Home.
 No real auth API or biometric gate is active. This checkout's Android identity is
 `com.uniride.partner`; use that package when launching the partner app.
+
+## Shared system navigation area
+
+`App.tsx` enables `KeyboardProvider.navigationBarTranslucent`: the root app draws
+behind Android's gesture/navigation area instead of leaving a white content
+margin. Screen safe-area padding and the tab bar still protect interactive content.
+The root background uses the active theme; `Appearance.setColorScheme` follows the
+saved app preference so native controls and gesture-bar contrast match. System
+mode releases that override with `unspecified` and follows the OS again.
+Shared native Modal also sets `navigationBarTranslucent` alongside
+`statusBarTranslucent`, allowing sheets to color their own bottom safe area.
+No new dependency, permission or native identity change.
+
+Verification: existing App/theme/tab/Menu/Home checks **21/21 passed**; UI guard
+and whitespace checks pass. Android dark Login, Home/tab bar and emergency sheet
+checked without the white strip (`/private/tmp/nav-dark.png`, `nav-home.png`,
+`nav-sheet.png`). Login gesture indicator remains visible. Existing
+TextArea/CardImageComponent type errors remain.
 
 ## Earlier starter baseline
 

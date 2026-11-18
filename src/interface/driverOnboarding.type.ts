@@ -114,6 +114,7 @@ export interface DriverOnboardingDraft {
 export interface DriverOnboardingStore extends DriverOnboardingDraft {
   start: (firstName: string) => void;
   clear: () => void;
+  completePreview: () => boolean;
   setCity: (value: string) => void;
   setReferral: (value: string) => void;
   setVehicleType: (value: VehicleType) => void;

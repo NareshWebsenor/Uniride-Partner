@@ -6,7 +6,10 @@ import {
   StyleSheet,
   View,
 } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import {
+  SafeAreaProvider,
+  useSafeAreaInsets,
+} from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { hp, wp } from '@/utils/responsive.utils';
@@ -21,6 +24,8 @@ export type ModalProps = {
   children: React.ReactNode;
   placement?: 'center' | 'bottom';
   dismissible?: boolean;
+  showCloseButton?: boolean;
+  edgeToEdge?: boolean;
 };
 
 export function Modal({
@@ -30,49 +35,86 @@ export function Modal({
   children,
   placement = 'center',
   dismissible = true,
+  showCloseButton = true,
+  edgeToEdge = false,
 }: ModalProps) {
-  const colors = useThemeColor();
-  const insets = useSafeAreaInsets();
-  const { t } = useTranslation();
-  const safeBottomPadding =
-    placement === 'bottom' ? 0 : insets.bottom + hp('2%');
   return (
     <NativeModal
       visible={visible}
       transparent
       animationType="fade"
       statusBarTranslucent
+      navigationBarTranslucent
       onRequestClose={dismissible ? onClose : undefined}
     >
+      <SafeAreaProvider>
+        <ModalContent
+          {...{
+            onClose,
+            title,
+            children,
+            placement,
+            dismissible,
+            showCloseButton,
+            edgeToEdge,
+          }}
+        />
+      </SafeAreaProvider>
+    </NativeModal>
+  );
+}
+
+function ModalContent({
+  onClose,
+  title,
+  children,
+  placement,
+  dismissible,
+  showCloseButton,
+  edgeToEdge,
+}: Omit<ModalProps, 'visible'>) {
+  const colors = useThemeColor();
+  const insets = useSafeAreaInsets();
+  const { t } = useTranslation();
+  const safeBottomPadding =
+    placement === 'bottom' ? 0 : insets.bottom + hp('2%');
+  return (
+    <View
+      style={[
+        styles.overlay,
+        placement === 'bottom' && styles.bottomOverlay,
+        edgeToEdge && { paddingHorizontal: 0 },
+        {
+          backgroundColor: colors.overlay,
+          paddingTop: insets.top + hp('2%'),
+          paddingBottom: safeBottomPadding,
+        },
+      ]}
+    >
+      <Pressable
+        accessible={false}
+        importantForAccessibility="no"
+        style={StyleSheet.absoluteFill}
+        onPress={dismissible ? onClose : undefined}
+      />
       <View
+        accessibilityViewIsModal
+        onAccessibilityEscape={dismissible ? onClose : undefined}
         style={[
-          styles.overlay,
-          placement === 'bottom' && styles.bottomOverlay,
+          styles.panel,
+          edgeToEdge && {
+            maxWidth: '100%',
+            borderBottomLeftRadius: 0,
+            borderBottomRightRadius: 0,
+          },
           {
-            backgroundColor: colors.overlay,
-            paddingTop: insets.top + hp('2%'),
-            paddingBottom: safeBottomPadding,
+            backgroundColor: colors.surface,
+            paddingBottom:
+              hp('2%') + (placement === 'bottom' ? insets.bottom : 0),
           },
         ]}
       >
-        <Pressable
-          accessible={false}
-          importantForAccessibility="no"
-          style={StyleSheet.absoluteFill}
-          onPress={dismissible ? onClose : undefined}
-        />
-        <View
-          accessibilityViewIsModal
-          onAccessibilityEscape={dismissible ? onClose : undefined}
-          style={[
-            styles.panel,
-            {
-              backgroundColor: colors.surface,
-              paddingBottom:
-                hp('2%') + (placement === 'bottom' ? insets.bottom : 0),
-            },
-          ]}
-        >
+        {title || (dismissible && showCloseButton) ? (
           <View style={styles.header}>
             {title ? (
               <Heading level={3} style={styles.title}>
@@ -81,7 +123,7 @@ export function Modal({
             ) : (
               <View style={styles.title} />
             )}
-            {dismissible ? (
+            {dismissible && showCloseButton ? (
               <IconButton
                 accessibilityLabel={t('ui.close')}
                 onPress={onClose}
@@ -95,15 +137,15 @@ export function Modal({
               />
             ) : null}
           </View>
-          <ScrollView
-            keyboardShouldPersistTaps="handled"
-            contentContainerStyle={styles.content}
-          >
-            {children}
-          </ScrollView>
-        </View>
+        ) : null}
+        <ScrollView
+          keyboardShouldPersistTaps="handled"
+          contentContainerStyle={styles.content}
+        >
+          {children}
+        </ScrollView>
       </View>
-    </NativeModal>
+    </View>
   );
 }
 

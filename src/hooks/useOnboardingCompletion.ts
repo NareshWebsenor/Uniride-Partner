@@ -27,11 +27,10 @@ export function useOnboardingCompletion(onFinished: () => void) {
         {
           text: t('driverOnboarding.finish'),
           onPress: () => {
-            if (!canFinish(useDriverOnboardingStore.getState())) {
+            if (!useDriverOnboardingStore.getState().completePreview()) {
               pending.current = false;
               return;
             }
-            useDriverOnboardingStore.getState().clear();
             logger.info('driver_onboarding.preview_completed', { scope: 'ui' });
             onFinished();
           },

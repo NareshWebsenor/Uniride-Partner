@@ -9,6 +9,11 @@ import {
 import { useThemeColor } from "@/hooks/useThemeColor";
 import { fSize, hp, wp } from "@/utils/responsive.utils";
 import { logger } from "@/utils/logger";
+import { useNavigation, type NavigationProp } from "@react-navigation/native";
+import type { TRootStack } from "@/interface/navigation.type";
+import { useDriverOnboardingStore } from "@/store/driverOnboardingStore";
+import { hasMenuVehicle } from "@/utils/menuDocuments";
+import LogoutSheet from "../menu/LogoutSheet";
 import MenuProfileCard from "../menu/MenuProfileCard";
 import MenuPreferences from "../menu/MenuPreferences";
 import { MenuRow, MenuSection } from "../menu/MenuSection";
@@ -16,6 +21,10 @@ import { MenuRow, MenuSection } from "../menu/MenuSection";
 export default function MenuScreen() {
   const { t } = useAppTranslation();
   const colors = useThemeColor();
+  const navigation = useNavigation<NavigationProp<TRootStack>>();
+  const vehicle = useDriverOnboardingStore((state) => state.vehicle);
+  const [missingVehicle, setMissingVehicle] = useState(false);
+  const [logoutVisible, setLogoutVisible] = useState(false);
   const [pending, setPending] = useState<TranslationKey | null>(null);
   const showPending = (key: TranslationKey) => {
     logger.debug("menu.preview_action", { scope: "menu", code: key });
@@ -34,27 +43,35 @@ export default function MenuScreen() {
             icon="document-text-outline"
             title={t("menu.documents")}
             subtitle={t("menu.documentsDescription")}
-            onPress={() => showPending("menu.documents")}
+            onPress={() => navigation.navigate("MyDocumentsScreen")}
           />
           <MenuRow
             icon="car-outline"
             title={t("menu.vehicle")}
-            subtitle={t("menu.demoVehicle")}
-            onPress={() => showPending("menu.vehicle")}
+            subtitle={
+              hasMenuVehicle(vehicle)
+                ? `${vehicle.make} ${vehicle.model}`
+                : t("menuDetails.vehicleNotAdded")
+            }
+            onPress={() => {
+              if (hasMenuVehicle(vehicle))
+                navigation.navigate("VehicleDetailsScreen");
+              else setMissingVehicle(true);
+            }}
             last
           />
         </MenuSection>
-        <MenuPreferences onPending={showPending} />
+        <MenuPreferences />
         <MenuSection title={t("menu.helpSafety")}>
           <MenuRow
             icon="headset-outline"
             title={t("menu.help")}
-            onPress={() => showPending("menu.help")}
+            onPress={() => navigation.navigate("HelpSupportScreen")}
           />
           <MenuRow
             icon="shield-checkmark-outline"
             title={t("menu.safety")}
-            onPress={() => showPending("menu.safety")}
+            onPress={() => navigation.navigate("SafetyScreen")}
             last
           />
         </MenuSection>
@@ -63,7 +80,7 @@ export default function MenuScreen() {
             <MenuRow
               icon="log-out-outline"
               title={t("profile.log_out")}
-              onPress={() => showPending("profile.log_out")}
+              onPress={() => setLogoutVisible(true)}
               destructive
               last
             />
@@ -72,6 +89,7 @@ export default function MenuScreen() {
         <View style={styles.footer}>
           <Pressable
             accessibilityRole="button"
+            accessibilityLabel={t("menu.terms")}
             onPress={() => showPending("menu.terms")}
             style={styles.footerLink}
           >
@@ -84,6 +102,7 @@ export default function MenuScreen() {
           />
           <Pressable
             accessibilityRole="button"
+            accessibilityLabel={t("menu.privacy")}
             onPress={() => showPending("menu.privacy")}
             style={styles.footerLink}
           >
@@ -93,6 +112,17 @@ export default function MenuScreen() {
           </Pressable>
         </View>
       </ScrollView>
+      <Modal
+        visible={missingVehicle}
+        onClose={() => setMissingVehicle(false)}
+        title={t("menu.vehicle")}
+      >
+        <Text>{t("menuDocuments.addVehicleFirst")}</Text>
+      </Modal>
+      <LogoutSheet
+        visible={logoutVisible}
+        onClose={() => setLogoutVisible(false)}
+      />
       <Modal
         visible={pending !== null}
         onClose={() => setPending(null)}

@@ -9,7 +9,9 @@ Auth is UI-only; no email delivery, server verification or session creation. Bio
 [Module 2 — Auth Flow](docs/auth-flow.md) ·
 [Module 3 — Driver Onboarding](docs/driver-onboarding.md) ·
 [Module 4 — Home aur Bottom Tabs](docs/main-tabs.md) ·
-[Module 4 — Text Size](docs/text-size.md).
+[Module 4 — Text Size](docs/text-size.md) ·
+[Module 4 — Menu Details](docs/menu-details.md) ·
+[Module 4 — Home Ride Preview](docs/home-rides.md).
 
 # Getting Started
 

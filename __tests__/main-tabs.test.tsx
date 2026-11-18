@@ -58,6 +58,8 @@ test("opens Home, switches all five tabs and returns Home on back", async () => 
       expect(
         tree.root.findAllByProps({ testID: "menu-screen" }).length
       ).toBeGreaterThan(0);
+    } else if (name === 'Home') {
+      expect(tree.root.findAllByProps({ testID: 'home-screen' }).length).toBeGreaterThan(0);
     } else {
       expect(
         tree.root

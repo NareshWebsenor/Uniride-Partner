@@ -1,7 +1,7 @@
 {
   "textSize": {
     "title": "Text size",
-    "description": "Choose a comfortable reading size. Your choice applies across the app, alongside your device's text settings.",
+    "description": "Choose a text size to preview the message below. Tap Apply to update text throughout the app.",
     "small": "Small",
     "default": "Default",
     "large": "Large",
@@ -15,7 +15,9 @@
     "reset": "Reset to default",
     "saving": "Saving your text size…",
     "saved": "This size applies throughout the app and is saved for your next visit.",
-    "saveError": "Your text size could not be loaded or saved. This selection works now; retry to save it for next time."
+    "saveError": "Text size could not be loaded or saved. Tap Apply to save your selected size.",
+    "pending": "Only the message previews your selection. Tap Apply to use this size throughout the app.",
+    "apply": "Apply"
   },
   "menu": {
     "account": "Account",
@@ -63,7 +65,6 @@
     "earnings": "Earnings",
     "inbox": "Inbox",
     "menu": "Menu",
-
     "home": "Home",
     "invest": "Invest",
     "wallet": "Wallet",
@@ -391,7 +392,8 @@
     "en": "English",
     "hi": "हिन्दी",
     "continue": "Continue",
-    "saveError": "Could not save your selection. Please try again."
+    "saveError": "Could not save your selection. Please try again.",
+    "es": "Español"
   },
   "settings": {
     "title": "App settings",
@@ -682,7 +684,7 @@
     "ownDescription": "Complete these 3 steps to start earning.",
     "vehicleDescription": "Complete your vehicle details to continue.",
     "previewTitle": "Onboarding preview complete",
-    "previewMessage": "Your details were checked on this device. No application or documents have been submitted online. This preview draft will now be cleared.",
+    "previewMessage": "Your details were checked on this device. No application or documents have been submitted online. Documents and vehicle details remain available during this session; bank details will be cleared.",
     "finish": "Finish preview",
     "cityTitle": "Earn With Uni Ride",
     "cityDescription": "Decide when, where, and how you want to earn.",
@@ -813,5 +815,197 @@
       "cancel": "Cancel",
       "invalid": "Choose today or a future date."
     }
+  },
+  "menuDetails": {
+    "saved": "Changes saved",
+    "saveLanguage": "Save language",
+    "chooseLanguage": "Choose your language",
+    "languageDescription": "Select the language you prefer to use in the app.",
+    "currentLanguage": "Current language",
+    "languageNames": {
+      "en": "English",
+      "hi": "Hindi",
+      "es": "Spanish"
+    },
+    "languageNote": "This changes the app language only. You can change it again anytime in Settings.",
+    "logoutTitle": "Logout",
+    "logoutMessage": "Are you sure you want to logout?",
+    "vehicleNotAdded": "No vehicle added"
+  },
+  "menuHelp": {
+    "title": "How can we help?",
+    "description": "Find answers or get in touch with our team.",
+    "search": "Search for help",
+    "browse": "Browse help topics",
+    "commonQuestions": "Common questions",
+    "moreHelp": "Need more help?",
+    "contact": "Contact support",
+    "contactDescription": "Send a message to our support team",
+    "requests": "My support requests",
+    "requestsDescription": "View your conversations and updates",
+    "noResults": "No matching topics. Try a different search.",
+    "topics": {
+      "trips": {
+        "title": "Trips & cancellations",
+        "description": "Ride issues, fares and cancellations"
+      },
+      "earnings": {
+        "title": "Earnings & payments",
+        "description": "Wallet, payouts and cash collections"
+      },
+      "account": {
+        "title": "Account & app",
+        "description": "Login, profile and technical issues"
+      },
+      "documents": {
+        "title": "Documents & vehicle",
+        "description": "Verification and vehicle updates"
+      }
+    },
+    "faq": {
+      "trip": {
+        "question": "How do I report an issue with a trip?",
+        "answer": "Trip support is coming soon. You will be able to select a trip and contact our support team."
+      },
+      "payout": {
+        "question": "When will I receive my payout?",
+        "answer": "Payout details will appear in Earnings when payments become available."
+      },
+      "documents": {
+        "question": "Why are my documents still pending?",
+        "answer": "Your selected documents are shown in My documents. Verification will be available when document review is connected."
+      }
+    }
+  },
+  "menuSafety": {
+    "danger": "In immediate danger?",
+    "description": "Use your local emergency service for urgent help.",
+    "call": "Call {{number}}",
+    "callError": "Could not open the phone app. Please dial 123 from your phone.",
+    "contacts": "Emergency contacts",
+    "noContacts": "No emergency contacts added",
+    "contactsDescription": "Keep someone you trust one tap away.",
+    "addContact": "+ Add emergency contact",
+    "tools": "Safety tools",
+    "support": "Contact safety support",
+    "supportDescription": "Report an incident or safety concern",
+    "share": "Share my trip",
+    "shareDescription": "Let a trusted person follow your trip",
+    "tips": "Safety tips & guidelines",
+    "tipsDescription": "Simple checks for a safer journey",
+    "tipsBody": "Before a trip, check the vehicle and keep your phone charged. Follow local traffic rules. Stop safely before using your phone.",
+    "note": "App support is not an emergency service."
+  },
+  "menuDocuments": {
+    "description": "Manage your driving and vehicle documents.",
+    "progress_one": "{{count}} of {{total}} documents uploaded",
+    "progress_other": "{{count}} of {{total}} documents uploaded",
+    "yourDocuments": "Your documents",
+    "license": "Driving licence",
+    "government": "Government ID",
+    "photo": "Profile photo",
+    "rc": "Registration certificate",
+    "insurance": "Vehicle insurance",
+    "pollution": "Pollution certificate (PUC)",
+    "validUntil": "Valid until {{date}}",
+    "uploaded": "Uploaded",
+    "notUploaded": "Not uploaded",
+    "expiring": "Expiring soon",
+    "expired": "Expired",
+    "pendingVerification": "Verification pending",
+    "view": "View",
+    "upload": "Upload",
+    "update": "Update",
+    "needHelp": "Need help?",
+    "contactSupport": "Contact support",
+    "addVehicleFirst": "Please add a vehicle first.",
+    "yourVehicle": "Your vehicle",
+    "vehicleInformation": "Vehicle information",
+    "vehicleDocuments": "Vehicle documents",
+    "make": "Make",
+    "model": "Model",
+    "variant": "Variant",
+    "year": "Year of manufacture",
+    "vehicleType": "Vehicle type",
+    "car": "Car",
+    "bike": "Bike",
+    "notProvided": "Not provided",
+    "front": "Front side",
+    "back": "Back side",
+    "openFile": "Open PDF",
+    "previewError": "Unable to open this file. It may no longer be available, or a compatible viewer may be missing. You can select the document again using Update."
+  },
+  "menuAlerts": {
+    "chooseSound": "Choose your alert sound",
+    "soundDescription": "Make new orders easy to hear. Preview a tone below.",
+    "alertTone": "Alert tone",
+    "tapPreview": "Tap to play preview",
+    "classic": "Classic",
+    "chime": "Chime",
+    "bell": "Bell",
+    "pulse": "Pulse",
+    "classicDescription": "A familiar three-note alert",
+    "chimeDescription": "Soft, two-note chime",
+    "bellDescription": "Bright, clear ring",
+    "pulseDescription": "Repeating short beeps",
+    "currentSound": "Current sound",
+    "preview": "Preview {{sound}}",
+    "stopPreview": "Stop {{sound}} preview",
+    "previewError": "Could not play this sound. Tap play to try again.",
+    "vibrate": "Vibrate on alert",
+    "vibrateDescription": "Vibrate with the alert sound",
+    "save": "Save preferences",
+    "preferenceError": "Could not load or save your preferences. Please try again.",
+    "notificationPreference": "Notification preference",
+    "notificationDescription": "Turn app notifications on or off.",
+    "off": "Off",
+    "saving": "Saving preference…"
+  },
+  "homeRide": {
+    "offline": "Offline",
+    "online": "Online",
+    "offlineTitle": "You’re offline",
+    "onlineTitle": "You’re online",
+    "offlineDescription": "Go online to start receiving ride requests.",
+    "onlineDescription": "Waiting for your next ride request.",
+    "goOnline": "Go Online",
+    "goOffline": "Go Offline",
+    "earned": "Earned",
+    "trips": "Trips",
+    "onlineTime": "Online",
+    "duration": "5h 20m",
+    "newRequest": "New ride request",
+    "pickupDistance": "{{place}} · 1.2 km away",
+    "tripDistance": "{{place}} · 14.2 km trip",
+    "accept": "Accept ride",
+    "decline": "Decline",
+    "timeRemaining": "Time left to accept",
+    "pickupAt": "Pickup at",
+    "arriving": "Arriving · 3 min",
+    "navigate": "Navigate",
+    "callRider": "Call rider",
+    "messageRider": "Message rider",
+    "otpLabel": "Enter ride’s 4-digit OTP",
+    "otpHint": "Demo trip: any 4 digits are accepted.",
+    "otpError": "Enter a 4-digit OTP to start the trip.",
+    "otpDigit": "OTP digit {{index}}",
+    "startTrip": "Start Trip",
+    "started": "Trip started",
+    "startedDescription": "Your demo trip is now in progress.",
+    "swipeHint": "Slide to the right to confirm. Screen reader users can activate this control.",
+    "demo": "Demo trip",
+    "demoMap": "Demo map",
+    "mapUnavailable": "Map unavailable · demo preview",
+    "navigationError": "Unable to open navigation. Please try again.",
+    "emergency": "Emergency help",
+    "ambulance": "Call ambulance",
+    "ambulanceDescription": "For medical emergencies",
+    "police": "Call police",
+    "policeDescription": "Report an emergency",
+    "callEmergency": "Open emergency dialer · 123",
+    "mapLoadFailed": "Map could not load. Check your connection and try again.",
+    "routeUnavailable": "Road route unavailable. Please try again.",
+    "routeLoading": "Finding road route…",
+    "retryMap": "Retry"
   }
 }

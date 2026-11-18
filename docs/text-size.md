@@ -8,11 +8,17 @@ Header/back control fixed hai; preview aur options separately scroll karte hain.
 ## Behavior
 
 - Four choices: Small 85%, Default 100%, Large 115%, Extra large 130%.
-- Preview heading, paragraph aur sample message selection ke saath live resize hote
-  hain. Choice immediately poore app par apply hoti hai; separate Save button nahi.
-- Reset to default aur failed save par Retry available hain. Pending writes ke
-  dauran Saving status; failure par selection current session mein visible rehti hai,
-  lekin next launch ke liye saved claim nahi hota.
+- Selecting a radio option changes only the “Hello! I'm waiting near the pickup
+  point” message. Heading, paragraph, controls and all other app text keep the
+  currently applied size. Selection is a screen-local draft, never persisted.
+- A different selection shows **Apply**. Apply updates the app through the existing
+  store and saves the choice; button returns to **Reset to default**. Selecting
+  another option repeats preview → Apply. Selecting the applied value cancels the
+  pending change. Back discards the unapplied draft.
+- Reset immediately applies/persists Default and updates the selected radio/message.
+  Reset is disabled when Default is already applied. While saving, choices and the
+  action are disabled. Failed save keeps the applied session size and shows an
+  error plus Apply for retry; it does not claim the preference was saved.
 - English/Hindi labels, light/dark palettes, font wrapping aur scrolling supported.
 - Device accessibility font scaling additional rehti hai. App preference OS setting
   ko modify nahi karti. Native system dialogs, keyboard, pickers aur text embedded
@@ -28,6 +34,9 @@ Header/back control fixed hai; preview aur options separately scroll karte hain.
   corrupt/unsupported/read failures default + recoverable error produce karte hain.
 - `App.tsx` theme/language/text-size hydration complete hone par navigation mount
   karta hai. Settings apply karne se navigation/form remount nahi hota.
+- `TextSizeScreen` compensates the message's base font by draft-scale/applied-scale,
+  so the shared renderer previews the absolute selected size exactly once. It does
+  not change global typography or add a second preference owner.
 - `src/components/ui/Typography.tsx` final native text/input boundary par `fontSize`,
   explicit `lineHeight` aur `letterSpacing` multiply karta hai. Existing static
   StyleSheet values aur caller overrides isliye immediately update hote hain.
@@ -45,22 +54,18 @@ Header/back control fixed hai; preview aur options separately scroll karte hain.
 
 ## Verification
 
-- Store tests cover all saved choices, concurrent hydration, malformed/unsupported
-  storage, failed reads/writes, queued rapid choices, stale failures and retry.
-- UI tests cover final style overrides, line height, nested text, inputs retaining
-  their draft, buttons, already-visible modals, live preview, Hindi and reset.
-- Menu test verifies row order and destination; App test waits specifically for
-  persisted text-size hydration before rendering navigation.
-- Focused store/UI/Menu/tab/App checks: 26 pass; fixed-header follow-up UI/App
-  checks: 4 pass. Full suite: 85 pass, same 8 baseline failures (biometric gate,
-  biometric service, legacy logout and shared UI assertions); existing open-handle
-  warning remains.
-- Android emulator: Notifications → Text size placement, default/130% live preview,
-  fixed back header, return to selected Menu, resized Menu/tab labels and cold app
-  restart into login with saved 130% size visually verified. Default restored after
-  checking. Input draft retention and Hindi/reset covered in UI tests.
+- `yarn test --runInBand __tests__/text-size-ui.test.tsx
+  __tests__/text-size-store.test.ts __tests__/menu-screen.test.tsx`: **26/26 pass**.
+  Covers message-only preview, unchanged global state/storage before Apply,
+  repeat selection after Apply without double scaling, draft discard, Hindi,
+  Reset, save failure/retry and disabled controls during persistence.
+- Existing tests also cover native text/input styles, nested text, retained input
+  drafts, buttons/modals, corrupt storage, hydration and ordered writes.
 - `yarn check:ui` and `git diff --check` pass. Type-check retains the existing
-  TextArea null numberOfLines and CardImageComponent style errors. ESLint config
-  remains missing from baseline; no native files/dependencies changed.
-- Physical device/iOS aur unusually large combined OS/app font scales need device
-  coverage; native system UI follows OS text settings.
+  TextArea/CardImageComponent errors; no native/dependency change.
+- Earlier store integration was verified on Android for cold-restart persistence.
+  Android emulator verified Small → draft Extra large (only message changes) →
+  Apply (global resize/Reset button) → Reset (Default). Heading bounds stayed
+  identical during draft preview. Evidence: `/private/tmp/uniride-text-size-draft.png`
+  and `/private/tmp/uniride-text-size-applied.png`. Original Small preference restored.
+  Physical device/iOS and unusually large combined OS/app scales remain unverified.

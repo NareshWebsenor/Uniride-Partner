@@ -2,6 +2,27 @@ apply plugin: "com.android.application"
 apply plugin: "org.jetbrains.kotlin.android"
 apply plugin: "com.facebook.react"
 
+// Native Maps SDK needs the key in the manifest; react-native-dotenv handles JS.
+// CI can supply GOOGLE_MAP_API_KEY directly. Local builds use the root .env.
+def mapsKey = System.getenv("GOOGLE_MAP_API_KEY")
+if (mapsKey == null) {
+    def envFile = rootProject.file("../.env")
+    if (envFile.exists()) {
+        envFile.eachLine { line ->
+            def match = line =~ /^\s*(?:export\s+)?GOOGLE_MAP_API_KEY\s*=\s*(.*?)\s*$/
+            if (match.matches()) {
+                def value = match[0][1]
+                if ((value.startsWith('"') && value.endsWith('"')) ||
+                    (value.startsWith("'") && value.endsWith("'"))) {
+                    mapsKey = value.substring(1, value.length() - 1)
+                } else {
+                    mapsKey = value.replaceFirst(/\s+#.*$/, "").trim()
+                }
+            }
+        }
+    }
+}
+
 /**
  * This is the configuration block to customize your React Native Android app.
  * By default you don't need to apply any configuration, just uncomment the lines you need.
@@ -84,6 +105,7 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0"
+        manifestPlaceholders["googleMapsApiKey"] = mapsKey ?: ""
     }
     signingConfigs {
         debug {

@@ -3,32 +3,28 @@ import { Pressable, StyleSheet, View } from "react-native";
 import { Alert, Modal, RadioButton, Switch, Text } from "@/components/ui";
 import { useTheme } from "@/hooks/useTheme";
 import { useLanguage } from "@/hooks/useLanguage";
-import {
-  useAppTranslation,
-  type TranslationKey,
-} from "@/hooks/useAppTranslation";
+import { useAppTranslation } from "@/hooks/useAppTranslation";
 import { useThemeStore } from "@/store/themeStore";
-import { supportedLanguages } from "@/localizations";
 import { Ionicons } from "@/utils/fontIcon.utils";
 import { fSize, hp, wp } from "@/utils/responsive.utils";
 import { MenuRow, MenuSection } from "./MenuSection";
 import { useNavigation, type NavigationProp } from "@react-navigation/native";
 import type { TRootStack } from "@/interface/navigation.type";
+import { useNotificationPreferencesStore } from "@/store/notificationPreferencesStore";
 import { useTextSizeStore } from "@/store/textSizeStore";
 
-export default function MenuPreferences({
-  onPending,
-}: {
-  onPending: (key: TranslationKey) => void;
-}) {
+export default function MenuPreferences() {
   const { t } = useAppTranslation();
   const navigation = useNavigation<NavigationProp<TRootStack>>();
   const textSize = useTextSizeStore((state) => state.size);
   const { colors, mode, resolvedTheme, setMode } = useTheme();
-  const { language, changeLanguage, error } = useLanguage();
+  const { language } = useLanguage();
+  const sound = useNotificationPreferencesStore((state) => state.sound);
+  const notificationsEnabled = useNotificationPreferencesStore(
+    (state) => state.notificationsEnabled
+  );
   const themeError = useThemeStore((state) => state.persistenceError);
-  const [selection, setSelection] = useState<"theme" | "language" | null>(null);
-  const [saving, setSaving] = useState(false);
+  const [themeOpen, setThemeOpen] = useState(false);
 
   return (
     <>
@@ -38,7 +34,7 @@ export default function MenuPreferences({
             accessibilityRole="button"
             accessibilityLabel={t("settings.appearance")}
             accessibilityHint={t("menu.appearanceHint")}
-            onPress={() => setSelection("theme")}
+            onPress={() => setThemeOpen(true)}
             style={styles.themeLabel}
           >
             <Ionicons
@@ -64,19 +60,19 @@ export default function MenuPreferences({
           icon="globe-outline"
           title={t("menu.appLanguage")}
           value={t(`language.${language}`)}
-          onPress={() => setSelection("language")}
+          onPress={() => navigation.navigate("AppLanguageScreen")}
         />
         <MenuRow
           icon="volume-high-outline"
           title={t("menu.orderSound")}
-          value={t("menu.classic")}
-          onPress={() => onPending("menu.orderSound")}
+          value={t(`menuAlerts.${sound}`)}
+          onPress={() => navigation.navigate("OrderSoundScreen")}
         />
         <MenuRow
           icon="notifications-outline"
           title={t("profile.notifications")}
-          value={t("menu.on")}
-          onPress={() => onPending("profile.notifications")}
+          value={t(notificationsEnabled ? "menu.on" : "menuAlerts.off")}
+          onPress={() => navigation.navigate("NotificationsScreen")}
         />
         <MenuRow
           icon="text-outline"
@@ -89,46 +85,23 @@ export default function MenuPreferences({
       {themeError && (
         <Alert tone="error" message={t("settings.themeSaveError")} />
       )}
-      {error && <Alert tone="error" message={t(error)} />}
       <Modal
-        visible={selection !== null}
-        onClose={() => setSelection(null)}
-        title={t(
-          selection === "theme" ? "settings.appearance" : "language.title"
-        )}
+        visible={themeOpen}
+        onClose={() => setThemeOpen(false)}
+        title={t("settings.appearance")}
       >
-        {selection === "theme"
-          ? (["light", "dark", "system"] as const).map((value) => (
-              <RadioButton
-                key={value}
-                label={t(`settings.${value}`)}
-                value={mode === value}
-                onValueChange={() => {
-                  void setMode(value);
-                }}
-              />
-            ))
-          : supportedLanguages.map((value) => (
-              <RadioButton
-                key={value}
-                label={t(`language.${value}`)}
-                value={language === value}
-                disabled={saving}
-                onValueChange={async () => {
-                  setSaving(true);
-                  try {
-                    await changeLanguage(value);
-                  } finally {
-                    setSaving(false);
-                  }
-                }}
-              />
-            ))}
-        {selection === "theme" && themeError && (
+        {(["light", "dark", "system"] as const).map((value) => (
+          <RadioButton
+            key={value}
+            label={t(`settings.${value}`)}
+            value={mode === value}
+            onValueChange={() => {
+              void setMode(value);
+            }}
+          />
+        ))}
+        {themeError && (
           <Alert tone="error" message={t("settings.themeSaveError")} />
-        )}
-        {selection === "language" && error && (
-          <Alert tone="error" message={t(error)} />
         )}
       </Modal>
     </>

@@ -4,10 +4,10 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import i18n from "@/localizations";
 import MenuScreen from "@/screens/main/tab/MenuScreen";
+import { useDriverOnboardingStore } from "@/store/driverOnboardingStore";
 import { Modal, RadioButton, Switch } from "@/components/ui";
 import { resolveTheme, useThemeStore } from "@/store/themeStore";
 import { useLanguageStore } from "@/store/languageStore";
-import { ASYNC_KEYS } from "@/constants/storage";
 
 const mockNavigate = jest.fn();
 jest.mock("@react-navigation/native", () => ({
@@ -26,6 +26,7 @@ const button = (label: string) =>
 
 beforeEach(async () => {
   jest.clearAllMocks();
+  useDriverOnboardingStore.getState().clear();
   await AsyncStorage.clear();
   await act(async () => {
     await i18n.changeLanguage("en");
@@ -59,7 +60,7 @@ test("Text size row follows Notifications and opens its settings screen", async 
   expect(mockNavigate).toHaveBeenCalledWith("TextSizeScreen");
 });
 
-test("Menu controls persist dark/system and Hindi without a separate settings screen", async () => {
+test("Menu controls preserve dark/system and navigate to language settings", async () => {
   await act(async () => {
     await tree.root.findByType(Switch).props.onValueChange(true);
   });
@@ -82,42 +83,55 @@ test("Menu controls persist dark/system and Hindi without a separate settings sc
       .props.onClose();
     button("App language").props.onPress();
   });
-  await act(async () => {
-    await tree.root
-      .findAllByType(RadioButton)
-      .find((node) => node.props.label === "हिन्दी")!
-      .props.onValueChange();
-  });
-  expect(useLanguageStore.getState().language).toBe("hi");
-  expect(await AsyncStorage.getItem(ASYNC_KEYS.LANGUAGE)).toBe(
-    JSON.stringify("hi")
-  );
-  expect(button("ऐप की भाषा")).toBeDefined();
-  expect(tree.root.findByType(Switch).props.accessibilityLabel).toBe(
-    "डार्क मोड"
-  );
+  expect(mockNavigate).toHaveBeenCalledWith("AppLanguageScreen");
 });
 
-test("unavailable actions show a dismissible translated preview message", async () => {
-  for (const label of [
-    "My documents",
-    "Vehicle details",
-    "Order alert sound",
-    "Notifications",
-    "Help & support",
-    "Safety & emergency",
-    "Log out",
+test("Menu routes open their screens and missing fleet vehicle only alerts", async () => {
+  useDriverOnboardingStore.getState().setPreference("fleet");
+  for (const [label, route] of [
+    ["My documents", "MyDocumentsScreen"],
+    ["Order alert sound", "OrderSoundScreen"],
+    ["Notifications", "NotificationsScreen"],
+    ["Help & support", "HelpSupportScreen"],
+    ["Safety & emergency", "SafetyScreen"],
   ]) {
     await act(async () => button(label).props.onPress());
-    const modal = tree.root
-      .findAllByType(Modal)
-      .find((node) => node.props.visible)!;
-    expect(modal.props.title).toBe(label);
-    await act(async () => modal.props.onClose());
-    expect(
-      tree.root.findAllByType(Modal).filter((node) => node.props.visible)
-    ).toHaveLength(0);
+    expect(mockNavigate).toHaveBeenLastCalledWith(route);
   }
+  mockNavigate.mockClear();
+  await act(async () => button("Vehicle details").props.onPress());
+  const missing = tree.root
+    .findAllByType(Modal)
+    .find((node) => node.props.visible)!;
+  expect(missing.props.title).toBe(i18n.t("menu.vehicle"));
+  await act(async () => missing.props.onClose());
+  expect(mockNavigate).not.toHaveBeenCalled();
+  await act(async () => {
+    const store = useDriverOnboardingStore.getState();
+    store.updateVehicle({
+      make: "Maruti",
+      model: "Dzire",
+      variant: "VXI",
+      year: "2024",
+    });
+    store.commitVehicle();
+  });
+  await act(async () => button("Vehicle details").props.onPress());
+  expect(mockNavigate).toHaveBeenLastCalledWith("VehicleDetailsScreen");
+});
+
+test("legal links keep dismissible coming-soon message", async () => {
+  await act(async () => {
+    button(i18n.t("menu.terms")).props.onPress();
+  });
+  const modal = tree.root
+    .findAllByType(Modal)
+    .find((node) => node.props.visible)!;
+  expect(modal.props.title).toBe(i18n.t("menu.terms"));
+  await act(async () => modal.props.onClose());
+  expect(
+    tree.root.findAllByType(Modal).filter((node) => node.props.visible)
+  ).toHaveLength(0);
 });
 
 test("theme persistence failure is visible instead of claiming a saved preference", async () => {

@@ -15,6 +15,7 @@ export default function AppBackground({
   style,
   backgroundColor,
   extendUnderStatusBar = false,
+  statusBarStyle,
 }: AppBackgroundProps) {
   const { top, bottom, left, right } = useSafeAreaInsets();
   const colors = useThemeColor();
@@ -36,7 +37,7 @@ export default function AppBackground({
       statusBarColor={
         extendUnderStatusBar ? colors.transparent : backgroundColor
       }
-      StatusBarStyle={extendUnderStatusBar ? 'light-content' : undefined}
+      StatusBarStyle={statusBarStyle ?? (extendUnderStatusBar ? 'light-content' : undefined)}
     >
       <View style={[styles.container, style]}>{children}</View>
     </SafeAreaWrapper>

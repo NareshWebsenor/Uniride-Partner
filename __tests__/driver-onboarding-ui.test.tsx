@@ -177,7 +177,8 @@ test("fleet has no vehicle/bank stage and finishes only via explicit preview con
     index: 0,
     routes: [{ name: "MainStack" }],
   });
-  expect(store.getState().documents.license.front).toBeUndefined();
+  expect(store.getState().documents.license.front).toBeDefined();
+  expect(store.getState().bank.accountNumber).toBe('');
 });
 
 test("own vehicle checklist advances driver → vehicle → bank and blocks incomplete vehicle details", async () => {

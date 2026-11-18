@@ -2,18 +2,20 @@ import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import English from './en/translation.json';
 import Hindi from './hi/translation.json';
+import Spanish from './es/translation.json';
 
-export const supportedLanguages = ['en', 'hi'] as const;
+export const supportedLanguages = ['en', 'hi', 'es'] as const;
 export type AppLanguage = (typeof supportedLanguages)[number];
 
 export const isAppLanguage = (value: unknown): value is AppLanguage =>
-  value === 'en' || value === 'hi';
+  value === 'en' || value === 'hi' || value === 'es';
 
 // Bundled resources initialize synchronously without native helpers or storage.
 export const i18nReady = i18n.use(initReactI18next).init({
   resources: {
     en: { translation: English },
     hi: { translation: Hindi },
+    es: { translation: Spanish },
   },
   lng: 'en',
   fallbackLng: 'en',

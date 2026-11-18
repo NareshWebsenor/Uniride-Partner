@@ -1,30 +1,39 @@
-import React, { useCallback, useMemo } from 'react';
-import { TRootStack } from '@/interface/navigation.type';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { NavigationContainer } from '@react-navigation/native';
-import { navigationRef } from '@/utils/navigation.utils';
-import MainTabs from './MainTabs';
-import SplashScreen from '@/screens/splash/SplashScreen';
-import LoginScreen from '@/screens/auth/LoginScreen';
-import SettingsScreen from '@/screens/settings/SettingsScreen';
-import TextSizeScreen from '@/screens/settings/TextSizeScreen';
-import { useThemeStore } from '@/store/themeStore';
+import React, { useCallback, useMemo } from "react";
+import { TRootStack } from "@/interface/navigation.type";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { NavigationContainer } from "@react-navigation/native";
+import { navigationRef } from "@/utils/navigation.utils";
+import MainTabs from "./MainTabs";
+import SplashScreen from "@/screens/splash/SplashScreen";
+import LoginScreen from "@/screens/auth/LoginScreen";
+import SettingsScreen from "@/screens/settings/SettingsScreen";
+import TextSizeScreen from "@/screens/settings/TextSizeScreen";
+import { useThemeStore } from "@/store/themeStore";
 import {
   createNavigationTheme,
   statusBarStyleForColor,
-} from '@/utils/theme.utils';
-import EarningLocationScreen from '@/screens/driverOnboarding/EarningLocationScreen';
-import ChooseVehicleTypeScreen from '@/screens/driverOnboarding/ChooseVehicleTypeScreen';
-import DrivingPreferenceScreen from '@/screens/driverOnboarding/DrivingPreferenceScreen';
-import ProfileScreen from '@/screens/driverOnboarding/ProfileScreen';
-import DrivingLicenseScreen from '@/screens/driverOnboarding/DrivingLicenseScreen';
-import ProfilePictureScreen from '@/screens/driverOnboarding/ProfilePictureScreen';
-import GovernmentIdScreen from '@/screens/driverOnboarding/GovernmentIdScreen';
-import VehicleModelScreen from '@/screens/driverOnboarding/VehicleModelScreen';
-import VehicleRcScreen from '@/screens/driverOnboarding/VehicleRcScreen';
-import PollutionCertificateScreen from '@/screens/driverOnboarding/PollutionCertificateScreen';
-import VehicleInsuranceScreen from '@/screens/driverOnboarding/VehicleInsuranceScreen';
-import BankDetailsScreen from '@/screens/driverOnboarding/BankDetailsScreen';
+} from "@/utils/theme.utils";
+import EarningLocationScreen from "@/screens/driverOnboarding/EarningLocationScreen";
+import ChooseVehicleTypeScreen from "@/screens/driverOnboarding/ChooseVehicleTypeScreen";
+import DrivingPreferenceScreen from "@/screens/driverOnboarding/DrivingPreferenceScreen";
+import ProfileScreen from "@/screens/driverOnboarding/ProfileScreen";
+import DrivingLicenseScreen from "@/screens/driverOnboarding/DrivingLicenseScreen";
+import ProfilePictureScreen from "@/screens/driverOnboarding/ProfilePictureScreen";
+import GovernmentIdScreen from "@/screens/driverOnboarding/GovernmentIdScreen";
+import VehicleModelScreen from "@/screens/driverOnboarding/VehicleModelScreen";
+import VehicleRcScreen from "@/screens/driverOnboarding/VehicleRcScreen";
+import PollutionCertificateScreen from "@/screens/driverOnboarding/PollutionCertificateScreen";
+import VehicleInsuranceScreen from "@/screens/driverOnboarding/VehicleInsuranceScreen";
+import BankDetailsScreen from "@/screens/driverOnboarding/BankDetailsScreen";
+
+import MyDocumentsScreen from "@/screens/main/menu/MyDocumentsScreen";
+import VehicleDetailsScreen from "@/screens/main/menu/VehicleDetailsScreen";
+import DocumentViewerScreen from "@/screens/main/menu/DocumentViewerScreen";
+import AppLanguageScreen from "@/screens/main/menu/AppLanguageScreen";
+import OrderSoundScreen from "@/screens/main/menu/OrderSoundScreen";
+import NotificationsScreen from "@/screens/main/menu/NotificationsScreen";
+import HelpSupportScreen from "@/screens/main/menu/HelpSupportScreen";
+import SafetyScreen from "@/screens/main/menu/SafetyScreen";
 
 const RootNavigator = createNativeStackNavigator<TRootStack>();
 
@@ -33,8 +42,8 @@ type ApplicationProps = {
 };
 
 export default function Application({ onRouteChange }: ApplicationProps) {
-  const colors = useThemeStore(state => state.themeColor);
-  const mode = useThemeStore(state => state.resolvedTheme);
+  const colors = useThemeStore((state) => state.themeColor);
+  const mode = useThemeStore((state) => state.resolvedTheme);
   const navigationTheme = useMemo(
     () => createNavigationTheme(mode, colors),
     [mode, colors],
@@ -55,14 +64,14 @@ export default function Application({ onRouteChange }: ApplicationProps) {
       onStateChange={notifyProtectedRouteChange}
     >
       <RootNavigator.Navigator
-        initialRouteName="SplashScreen"
+        initialRouteName="MainStack"
         screenOptions={{
           headerShown: false,
           statusBarStyle:
-            statusBarStyleForColor(colors.surface, mode === 'dark') ===
-            'light-content'
-              ? 'light'
-              : 'dark',
+            statusBarStyleForColor(colors.surface, mode === "dark") ===
+            "light-content"
+              ? "light"
+              : "dark",
         }}
       >
         <RootNavigator.Screen component={SplashScreen} name="SplashScreen" />
@@ -123,7 +132,39 @@ export default function Application({ onRouteChange }: ApplicationProps) {
           component={SettingsScreen}
           name="SettingsScreen"
         />
-        <RootNavigator.Screen component={TextSizeScreen} name="TextSizeScreen" />
+        <RootNavigator.Screen
+          component={TextSizeScreen}
+          name="TextSizeScreen"
+        />
+        <RootNavigator.Screen
+          component={MyDocumentsScreen}
+          name="MyDocumentsScreen"
+        />
+        <RootNavigator.Screen
+          component={VehicleDetailsScreen}
+          name="VehicleDetailsScreen"
+        />
+        <RootNavigator.Screen
+          component={DocumentViewerScreen}
+          name="DocumentViewerScreen"
+        />
+        <RootNavigator.Screen
+          component={AppLanguageScreen}
+          name="AppLanguageScreen"
+        />
+        <RootNavigator.Screen
+          component={OrderSoundScreen}
+          name="OrderSoundScreen"
+        />
+        <RootNavigator.Screen
+          component={NotificationsScreen}
+          name="NotificationsScreen"
+        />
+        <RootNavigator.Screen
+          component={HelpSupportScreen}
+          name="HelpSupportScreen"
+        />
+        <RootNavigator.Screen component={SafetyScreen} name="SafetyScreen" />
       </RootNavigator.Navigator>
     </NavigationContainer>
   );

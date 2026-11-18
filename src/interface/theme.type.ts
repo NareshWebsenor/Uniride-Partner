@@ -12,6 +12,10 @@ export interface ThemeColors {
   onPrimary: string;
   tabActiveBackground: string;
   tabInactive: string;
+  toggleActive: string;
+  toggleInactive: string;
+  driverAvailable: string;
+  onDriverAvailable: string;
   success: string;
   warning: string;
   error: string;

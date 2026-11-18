@@ -22,6 +22,7 @@ jest.mock("@react-navigation/native", () => ({
 
 let tree: Renderer.ReactTestRenderer;
 beforeEach(async () => {
+  await AsyncStorage.clear();
   jest.clearAllMocks();
   await i18n.changeLanguage("en");
   useTextSizeStore.setState({
@@ -102,7 +103,7 @@ test("static style overrides, inputs, buttons and nested text scale once without
   expect(StyleSheet.flatten(copy("copy").props.style).fontSize).toBe(fSize(2));
 });
 
-test("screen previews selection live, saves it, translates and resets to default", async () => {
+const mountScreen = async () => {
   await act(async () => {
     tree = Renderer.create(
       <SafeAreaProvider>
@@ -110,32 +111,104 @@ test("screen previews selection live, saves it, translates and resets to default
       </SafeAreaProvider>
     );
   });
+};
+const action = (key: "apply" | "reset") =>
+  tree.root
+    .findAllByType(Button)
+    .find((node) => node.props.title === i18n.t(`textSize.${key}`))!;
+const fontFor = (key: string) =>
+  StyleSheet.flatten(
+    tree.root
+      .findAllByType(NativeText)
+      .find((node) => node.props.children === i18n.t(key))!.props.style
+  ).fontSize;
+const choose = async (index: number) => {
   await act(async () =>
-    tree.root.findAllByType(RadioButton)[3].props.onValueChange()
+    tree.root.findAllByType(RadioButton)[index].props.onValueChange()
   );
+};
+
+test("only the message previews a draft; Apply saves all text, subsequent drafts stay isolated and Reset restores default", async () => {
+  await mountScreen();
+  const bodySize = fontFor("textSize.sampleBody");
+  const headingSize = fontFor("textSize.sampleTitle");
+  const screenTitleSize = fontFor("textSize.title");
+  await choose(3);
+  expect(useTextSizeStore.getState().size).toBe("default");
+  expect(AsyncStorage.setItem).not.toHaveBeenCalled();
+  expect(fontFor("textSize.sampleMessage")).toBeCloseTo(fSize(2) * 1.3);
+  expect(fontFor("textSize.sampleBody")).toBe(bodySize);
+  expect(fontFor("textSize.sampleTitle")).toBe(headingSize);
+  expect(fontFor("textSize.title")).toBe(screenTitleSize);
+  expect(action("apply")).toBeDefined();
+  expect(action("reset")).toBeUndefined();
+  await act(async () => action("apply").props.onPress());
   expect(useTextSizeStore.getState().size).toBe("extraLarge");
-  const preview = tree.root
-    .findAllByType(NativeText)
-    .find((node) => node.props.children === i18n.t("textSize.sampleBody"))!;
-  expect(StyleSheet.flatten(preview.props.style).fontSize).toBeCloseTo(
-    fSize(2) * 1.3
-  );
+  expect(fontFor("textSize.sampleBody")).toBeCloseTo(fSize(2) * 1.3);
   expect(
     JSON.parse((await AsyncStorage.getItem("text-size-preference"))!).size
   ).toBe("extraLarge");
+  expect(action("reset")).toBeDefined();
+  jest.mocked(AsyncStorage.setItem).mockClear();
+  await choose(0);
+  expect(useTextSizeStore.getState().size).toBe("extraLarge");
+  expect(fontFor("textSize.sampleMessage")).toBeCloseTo(fSize(2) * 0.85);
+  expect(fontFor("textSize.sampleBody")).toBeCloseTo(fSize(2) * 1.3);
+  expect(AsyncStorage.setItem).not.toHaveBeenCalled();
+  await act(async () => action("apply").props.onPress());
+  expect(fontFor("textSize.sampleBody")).toBeCloseTo(fSize(2) * 0.85);
   await act(async () => {
     await i18n.changeLanguage("hi");
   });
   expect(tree.root.findAllByType(RadioButton)[3].props.label).toBe(
     "बहुत बड़ा (130%)"
   );
-  await act(async () =>
-    tree.root
-      .findAllByType(Button)
-      .find((node) => node.props.title === i18n.t("textSize.reset"))!
-      .props.onPress()
-  );
+  await act(async () => action("reset").props.onPress());
   expect(useTextSizeStore.getState().size).toBe("default");
+  expect(fontFor("textSize.sampleMessage")).toBeCloseTo(fSize(2));
+  expect(action("reset").props.disabled).toBe(true);
+});
+
+test("leaving without Apply discards the draft and returning to applied selection restores Reset", async () => {
+  await mountScreen();
+  await choose(2);
+  await choose(1);
+  expect(action("apply")).toBeUndefined();
+  expect(action("reset")).toBeDefined();
+  await choose(3);
+  await act(async () => tree.unmount());
+  await mountScreen();
+  expect(tree.root.findAllByType(RadioButton)[1].props.value).toBe(true);
+  expect(useTextSizeStore.getState().size).toBe("default");
+  expect(AsyncStorage.setItem).not.toHaveBeenCalled();
+});
+
+test("failed Apply offers Apply again, blocks changes while saving and retries persistence", async () => {
+  await mountScreen();
+  await choose(2);
+  let rejectWrite: (error: Error) => void = () => {};
+  jest.mocked(AsyncStorage.setItem).mockImplementationOnce(
+    () =>
+      new Promise((_, reject) => {
+        rejectWrite = reject;
+      })
+  );
+  await act(async () => action("apply").props.onPress());
+  expect(
+    tree.root.findAllByType(RadioButton).every((node) => node.props.disabled)
+  ).toBe(true);
+  expect(
+    tree.root.findAllByType(Button).some((node) => node.props.loading)
+  ).toBe(true);
+  await act(async () => rejectWrite(new Error("storage unavailable")));
+  expect(useTextSizeStore.getState().persistenceError).toBe(true);
+  expect(action("apply")).toBeDefined();
+  await act(async () => action("apply").props.onPress());
+  expect(useTextSizeStore.getState().persistenceError).toBe(false);
+  expect(
+    JSON.parse((await AsyncStorage.getItem("text-size-preference"))!).size
+  ).toBe("large");
+  expect(action("reset")).toBeDefined();
 });
 
 test("already open modal text reacts to size changes", async () => {

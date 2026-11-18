@@ -11,7 +11,9 @@ import { Button } from '@/components/ui';
 
 const mockNavigate = jest.fn();
 jest.mock('@react-navigation/native', () => ({
+  ...jest.requireActual('@react-navigation/native'),
   useNavigation: () => ({ navigate: mockNavigate }),
+  useIsFocused: () => true,
 }));
 
 beforeEach(async () => {
@@ -62,7 +64,7 @@ test('same splash resets into auth preview after its branded transition', async 
   jest.useRealTimers();
 });
 
-test('Home keeps its heading; preferences are available in Menu', async () => {
+test('Home opens offline with its availability action; preferences remain in Menu', async () => {
   let tree!: Renderer.ReactTestRenderer;
   await act(async () => {
     tree = Renderer.create(
@@ -71,9 +73,9 @@ test('Home keeps its heading; preferences are available in Menu', async () => {
       </SafeAreaProvider>,
     );
   });
-  expect(tree.root.findAllByType(Button)).toHaveLength(0);
+  expect(tree.root.findAllByType(Button).some(button => button.props.title === 'Go Online')).toBe(true);
   expect(tree.root.findAllByProps({ accessibilityRole: 'header' })
-    .some(header => header.props.children === 'Home')).toBe(true);
+    .some(header => header.props.children === 'You’re offline')).toBe(true);
   await act(async () => {
     tree.unmount();
   });

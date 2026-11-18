@@ -14,8 +14,8 @@ jest.mock('../src/utils/logger', () => ({
 function loadLanguage() {
   const store =
     require('../src/store/languageStore') as typeof import('../src/store/languageStore');
-  const i18n =
-    require('../src/localizations').default as typeof import('../src/localizations').default;
+  const i18n = require('../src/localizations')
+    .default as typeof import('../src/localizations').default;
   return { ...store, i18n };
 }
 
@@ -67,22 +67,28 @@ test('storage read failure exposes a translated error without blocking boot', as
   });
 });
 
-test('persists selection in the original format and restores after restart', async () => {
-  let stored: string | null = null;
-  mockStorage.getItem.mockImplementation(async () => stored);
-  mockStorage.setItem.mockImplementation(async (_key, value: string) => {
-    stored = value;
-  });
-  const firstSession = loadLanguage();
-  await firstSession.useLanguageStore.getState().changeLanguage('hi');
-  expect(mockStorage.setItem).toHaveBeenCalledWith('LANGUAGE', '"hi"');
+test.each(['hi', 'es'] as const)(
+  'persists %s in the original format and restores after restart',
+  async language => {
+    let stored: string | null = null;
+    mockStorage.getItem.mockImplementation(async () => stored);
+    mockStorage.setItem.mockImplementation(async (_key, value: string) => {
+      stored = value;
+    });
+    const firstSession = loadLanguage();
+    await firstSession.useLanguageStore.getState().changeLanguage(language);
+    expect(mockStorage.setItem).toHaveBeenCalledWith(
+      'LANGUAGE',
+      JSON.stringify(language),
+    );
 
-  jest.resetModules();
-  const secondSession = loadLanguage();
-  await secondSession.initializeLanguage();
-  expect(secondSession.useLanguageStore.getState().language).toBe('hi');
-  expect(secondSession.i18n.resolvedLanguage).toBe('hi');
-});
+    jest.resetModules();
+    const secondSession = loadLanguage();
+    await secondSession.initializeLanguage();
+    expect(secondSession.useLanguageStore.getState().language).toBe(language);
+    expect(secondSession.i18n.resolvedLanguage).toBe(language);
+  },
+);
 
 test('serializes rapid changes so the last preference wins in memory and storage', async () => {
   const { initializeLanguage, useLanguageStore, i18n } = loadLanguage();
@@ -130,4 +136,34 @@ test('bundled resources support English fallback, interpolation and plurals', as
   expect(i18n.t('settings.items', { count: 3 })).toBe('3 आइटम चुने गए');
   // This original Hindi bundle deliberately lacks the legacy key.
   expect(i18n.t('buttons.createAccount')).toBe('Create Account');
+});
+
+test('Spanish save failure keeps English until retry succeeds', async () => {
+  const { initializeLanguage, useLanguageStore, i18n } = loadLanguage();
+  await initializeLanguage();
+  mockStorage.setItem.mockRejectedValueOnce(new Error('storage full'));
+  await useLanguageStore.getState().changeLanguage('es');
+  expect(useLanguageStore.getState().language).toBe('en');
+  expect(i18n.resolvedLanguage).toBe('en');
+  await useLanguageStore.getState().changeLanguage('es');
+  expect(useLanguageStore.getState().language).toBe('es');
+  expect(i18n.resolvedLanguage).toBe('es');
+});
+
+test('Spanish resources preserve interpolation, plurals and English fallback', async () => {
+  const { initializeLanguage, useLanguageStore, i18n } = loadLanguage();
+  await initializeLanguage();
+  await useLanguageStore.getState().changeLanguage('es');
+  expect(i18n.t('tabs.home')).toBe('Inicio');
+  expect(i18n.t('settings.welcome', { name: 'Test' })).toContain('Test');
+  expect(i18n.t('settings.items', { count: 1 })).toBe(
+    '1 elemento seleccionado',
+  );
+  expect(i18n.t('settings.items', { count: 3 })).toBe(
+    '3 elementos seleccionados',
+  );
+  i18n.addResource('es', 'translation', 'settings.title', '');
+  expect(i18n.t('settings.title')).toBe(
+    i18n.t('settings.title', { lng: 'en' }),
+  );
 });

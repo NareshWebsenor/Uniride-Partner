@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 import AppBackground from "@/components/background/AppBackground";
 import { useNavigation } from "@react-navigation/native";
@@ -16,7 +16,7 @@ import { useAppTranslation } from "@/hooks/useAppTranslation";
 import { useThemeColor } from "@/hooks/useThemeColor";
 import { useTextSizeStore } from "@/store/textSizeStore";
 import { TEXT_SIZE_OPTIONS, TEXT_SIZE_SCALES } from "@/interface/textSize.type";
-import { hp, wp } from "@/utils/responsive.utils";
+import { fSize, hp, wp } from "@/utils/responsive.utils";
 
 export default function TextSizeScreen() {
   const { t } = useAppTranslation();
@@ -26,6 +26,9 @@ export default function TextSizeScreen() {
   const setSize = useTextSizeStore((state) => state.setSize);
   const saving = useTextSizeStore((state) => state.saving);
   const error = useTextSizeStore((state) => state.persistenceError);
+  const [selected, setSelected] = useState(size);
+  const hasDraft = selected !== size;
+  const needsApply = hasDraft || error;
 
   return (
     <AppBackground>
@@ -50,7 +53,18 @@ export default function TextSizeScreen() {
                 { backgroundColor: colors.surfaceRaised },
               ]}
             >
-              <Text>{t("textSize.sampleMessage")}</Text>
+              <Text
+                testID="text-size-sample-message"
+                style={{
+                  // Shared Text applies the current app scale once. Compensate
+                  // here so only this sentence previews the absolute draft size.
+                  fontSize:
+                    (fSize(2) * TEXT_SIZE_SCALES[selected]) /
+                    TEXT_SIZE_SCALES[size],
+                }}
+              >
+                {t("textSize.sampleMessage")}
+              </Text>
             </View>
           </Card>
           <Card>
@@ -62,39 +76,43 @@ export default function TextSizeScreen() {
                   size: t(`textSize.${option}`),
                   percent: Math.round(TEXT_SIZE_SCALES[option] * 100),
                 })}
-                value={size === option}
+                value={selected === option}
+                disabled={saving}
                 onValueChange={() => {
-                  void setSize(option);
+                  setSelected(option);
                 }}
               />
             ))}
           </Card>
           {error ? (
-            <>
-              <Alert tone="error" message={t("textSize.saveError")} />
-              <Button
-                title={t("ui.retry")}
-                onPress={() => {
-                  void setSize(size);
-                }}
-                loading={saving}
-              />
-            </>
+            <Alert tone="error" message={t("textSize.saveError")} />
           ) : (
             <Text
               tone="secondary"
               variant="caption"
               accessibilityLiveRegion="polite"
             >
-              {t(saving ? "textSize.saving" : "textSize.saved")}
+              {t(
+                saving
+                  ? "textSize.saving"
+                  : hasDraft
+                  ? "textSize.pending"
+                  : "textSize.saved"
+              )}
             </Text>
           )}
           <Button
-            title={t("textSize.reset")}
-            variant="outline"
-            disabled={size === "default" && !error}
+            title={t(needsApply ? "textSize.apply" : "textSize.reset")}
+            variant={needsApply ? "primary" : "outline"}
+            loading={saving}
+            disabled={!needsApply && size === "default"}
             onPress={() => {
-              void setSize("default");
+              if (needsApply) {
+                void setSize(selected);
+              } else {
+                setSelected("default");
+                void setSize("default");
+              }
             }}
           />
         </Container>

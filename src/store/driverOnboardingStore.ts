@@ -4,7 +4,11 @@ import type {
   DriverOnboardingDraft,
   DriverOnboardingStore,
 } from '@/interface/driverOnboarding.type';
-import { documentValid, vehicleValid } from '@/utils/driverOnboarding';
+import {
+  canFinish,
+  documentValid,
+  vehicleValid,
+} from '@/utils/driverOnboarding';
 import { logger } from '@/utils/logger';
 
 const emptyDocument = (): DocumentDraft => ({
@@ -46,6 +50,12 @@ export const useDriverOnboardingStore = create<DriverOnboardingStore>(
       logger.info('driver_onboarding.started', { scope: 'preview' });
     },
     clear: () => set(emptyDraft()),
+    completePreview: () => {
+      if (!canFinish(get())) return false;
+      // The Menu reads this session's documents; bank data is no longer needed.
+      set({ bank: emptyDraft().bank });
+      return true;
+    },
     setCity: city => set({ city }),
     setReferral: referral => set({ referral }),
     setVehicleType: vehicleType => {

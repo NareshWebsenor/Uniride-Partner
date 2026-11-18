@@ -43,7 +43,11 @@ export default function OnboardingDateField({
         <Text tone={date ? 'primary' : 'secondary'} style={styles.value}>
           {date
             ? date.toLocaleDateString(
-                i18n.language === 'hi' ? 'hi-IN' : 'en-BS',
+                i18n.language === 'hi'
+                  ? 'hi-IN'
+                  : i18n.language === 'es'
+                  ? 'es'
+                  : 'en-BS',
               )
             : t('driverOnboarding.date.placeholder')}
         </Text>

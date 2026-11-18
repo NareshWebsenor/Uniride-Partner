@@ -14,4 +14,5 @@ export interface AppBackgroundProps
   children: ReactNode;
   style?: StyleProp<ViewStyle>;
   extendUnderStatusBar?: boolean;
+  statusBarStyle?: import('react-native').StatusBarStyle;
 }

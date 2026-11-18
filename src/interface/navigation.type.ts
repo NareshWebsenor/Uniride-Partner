@@ -1,5 +1,8 @@
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import type { TDriverOnboardingStack } from './driverOnboarding.type';
+import type {
+  DocumentKind,
+  TDriverOnboardingStack,
+} from './driverOnboarding.type';
 
 export type TMainTabs = {
   Home: undefined;
@@ -16,6 +19,14 @@ export type TRootStack = TDriverOnboardingStack & {
   MainStack: undefined;
   SettingsScreen: undefined;
   TextSizeScreen: undefined;
+  MyDocumentsScreen: undefined;
+  VehicleDetailsScreen: undefined;
+  DocumentViewerScreen: { kind: DocumentKind };
+  AppLanguageScreen: undefined;
+  OrderSoundScreen: undefined;
+  NotificationsScreen: undefined;
+  HelpSupportScreen: undefined;
+  SafetyScreen: undefined;
 };
 
 export type TSplashStackProps = NativeStackScreenProps<

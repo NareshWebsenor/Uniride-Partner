@@ -72,7 +72,8 @@ No AsyncStorage, persisted files, auth tokens or API requests are added.
   fields/documents while retaining driver documents.
 - Final eligibility is checked again at confirmation. Fleet requires only driver
   documents; city, vehicle type, vehicle documents and bank are excluded. Own
-  requires city, vehicle type and all three stages. Finish clears the entire draft.
+  requires city, vehicle type and all three stages. Finish clears bank fields and retains documents/vehicle in memory for
+  [Module 4 — Menu Details](menu-details.md). Logout clears the entire draft.
 
 Completed means locally filled and submitted to the checklist, not externally
 verified. Final confirmation explicitly says no documents/application were sent online.

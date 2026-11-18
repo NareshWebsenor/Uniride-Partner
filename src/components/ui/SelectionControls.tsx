@@ -3,7 +3,6 @@ import {
   Pressable,
   StyleProp,
   StyleSheet,
-  Switch as NativeSwitch,
   TextStyle,
   View,
   ViewStyle,
@@ -115,24 +114,32 @@ export function Switch({
       onPress={() => onValueChange(!value)}
       style={({ pressed }) => [
         styles.row,
+        styles.switchTouchTarget,
         { opacity: disabled ? 0.4 : pressed ? 0.7 : 1 },
         style,
       ]}
     >
       {label ? <Text style={[styles.label, labelStyle]}>{label}</Text> : null}
-      <View pointerEvents="none">
-        <NativeSwitch
-          value={value}
-          disabled={disabled}
-          accessible={false}
-          importantForAccessibility="no"
-          trackColor={{
-            false: inactiveColor ?? colors.disabled,
-            true: activeColor ?? colors.primary,
-          }}
-          thumbColor={thumbColor ?? colors.onPrimary}
-          ios_backgroundColor={inactiveColor ?? colors.disabled}
-          style={controlStyle}
+      <View
+        pointerEvents="none"
+        accessible={false}
+        importantForAccessibility="no-hide-descendants"
+        style={[
+          styles.switchTrack,
+          {
+            backgroundColor: value
+              ? activeColor ?? colors.toggleActive
+              : inactiveColor ?? colors.toggleInactive,
+            alignItems: value ? 'flex-end' : 'flex-start',
+          },
+          controlStyle,
+        ]}
+      >
+        <View
+          style={[
+            styles.switchThumb,
+            { backgroundColor: thumbColor ?? colors.onPrimary },
+          ]}
         />
       </View>
     </Pressable>
@@ -147,6 +154,20 @@ const styles = StyleSheet.create({
     gap: wp('2%'),
   },
   label: { flex: 1, flexShrink: 1 },
+  switchTouchTarget: { minWidth: 48, justifyContent: 'center' },
+  switchTrack: {
+    width: wp('12%'),
+    height: wp('6.8%'),
+    borderRadius: 999,
+    padding: wp('0.6%'),
+    justifyContent: 'center',
+    flexShrink: 0,
+  },
+  switchThumb: {
+    width: wp('5.6%'),
+    height: wp('5.6%'),
+    borderRadius: 999,
+  },
   mark: {
     width: wp('6%'),
     height: wp('6%'),

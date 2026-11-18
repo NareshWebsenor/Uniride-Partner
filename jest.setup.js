@@ -47,3 +47,14 @@ jest.mock('react-native-linear-gradient', () => {
   const { View } = require('react-native');
   return View;
 });
+jest.mock('react-native-maps', () => {
+  const React = require('react');
+  const { View } = require('react-native');
+  const MapView = React.forwardRef((props, ref) => {
+    React.useImperativeHandle(ref, () => ({
+      fitToCoordinates: jest.fn(), animateToRegion: jest.fn(),
+    }));
+    return React.createElement(View, props);
+  });
+  return { __esModule: true, default: MapView, Marker: View, Polyline: View, PROVIDER_GOOGLE: 'google' };
+});

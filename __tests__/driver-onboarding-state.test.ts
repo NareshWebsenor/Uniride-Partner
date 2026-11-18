@@ -111,7 +111,7 @@ test("changing vehicle type clears vehicle details but preserves driver document
   expect(store.getState().documents.insurance.submitted).toBe(false);
 });
 
-test("new registration and completion clear sensitive draft fields", () => {
+test("new registration and logout clear sensitive draft fields", () => {
   fillDriver();
   store.getState().updateBank({ accountNumber: "1234" });
   store.getState().start("Next");
