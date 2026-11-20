@@ -1,4 +1,10 @@
-import React, { useCallback, useMemo } from "react";
+import React, { useCallback, useEffect, useMemo } from "react";
+import { AppState } from "react-native";
+import { useAuthStore } from "@/store/authStore";
+import { clearDriverSession } from "@/service/driverSession";
+import { logger } from "@/utils/logger";
+import DriverRegistrationScreen from "@/screens/driverOnboarding/DriverRegistrationScreen";
+import RegistrationStatusScreen from "@/screens/auth/RegistrationStatusScreen";
 import { TRootStack } from "@/interface/navigation.type";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { NavigationContainer } from "@react-navigation/native";
@@ -41,7 +47,22 @@ type ApplicationProps = {
   onRouteChange?: (routeName: string | undefined) => void;
 };
 
+function AuthenticatedMainTabs() {
+  const token = useAuthStore((state) => state.token);
+  const expiry = useAuthStore((state) => state.sessionExpiresAt);
+  return token && expiry && expiry > Date.now() ? <MainTabs /> : null;
+}
+const PUBLIC_ROUTES = new Set([
+  "SplashScreen",
+  "LoginScreen",
+  "DriverRegistrationScreen",
+  "RegistrationStatusScreen",
+  "SettingsScreen",
+  "TextSizeScreen",
+]);
 export default function Application({ onRouteChange }: ApplicationProps) {
+  const token = useAuthStore((state) => state.token);
+  const expiresAt = useAuthStore((state) => state.sessionExpiresAt);
   const colors = useThemeStore((state) => state.themeColor);
   const mode = useThemeStore((state) => state.resolvedTheme);
   const navigationTheme = useMemo(
@@ -54,8 +75,41 @@ export default function Application({ onRouteChange }: ApplicationProps) {
     }
     const rootState = navigationRef.getRootState();
     const activeRoute = rootState.routes[rootState.index];
+    const session = useAuthStore.getState();
+    if (
+      activeRoute &&
+      !PUBLIC_ROUTES.has(activeRoute.name) &&
+      (!session.token ||
+        !session.sessionExpiresAt ||
+        session.sessionExpiresAt <= Date.now())
+    ) {
+      navigationRef.resetRoot({
+        index: 0,
+        routes: [{ name: "LoginScreen", params: { register: false } }],
+      });
+      return;
+    }
     onRouteChange?.(activeRoute?.name);
   }, [onRouteChange]);
+  useEffect(() => {
+    notifyProtectedRouteChange();
+    if (!token || !expiresAt) return;
+    const expire = () => {
+      if (expiresAt <= Date.now()) {
+        void clearDriverSession().catch(() =>
+          logger.warn("driver_session.clear_failed", { scope: "auth" }),
+        );
+      }
+    };
+    const timer = setTimeout(expire, Math.max(0, expiresAt - Date.now()));
+    const subscription = AppState.addEventListener("change", (state) => {
+      if (state === "active") expire();
+    });
+    return () => {
+      clearTimeout(timer);
+      subscription.remove();
+    };
+  }, [token, expiresAt, notifyProtectedRouteChange]);
   return (
     <NavigationContainer
       ref={navigationRef}
@@ -127,7 +181,18 @@ export default function Application({ onRouteChange }: ApplicationProps) {
           component={BankDetailsScreen}
           name="BankDetailsScreen"
         />
-        <RootNavigator.Screen component={MainTabs} name="MainStack" />
+        <RootNavigator.Screen
+          component={DriverRegistrationScreen}
+          name="DriverRegistrationScreen"
+        />
+        <RootNavigator.Screen
+          component={RegistrationStatusScreen}
+          name="RegistrationStatusScreen"
+        />
+        <RootNavigator.Screen
+          component={AuthenticatedMainTabs}
+          name="MainStack"
+        />
         <RootNavigator.Screen
           component={SettingsScreen}
           name="SettingsScreen"

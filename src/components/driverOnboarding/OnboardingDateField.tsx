@@ -18,6 +18,8 @@ export default function OnboardingDateField({
   onChange,
   testID,
   error,
+  allowPast = false,
+  disabled = false,
 }: OnboardingDateFieldProps) {
   const [open, setOpen] = useState(false);
   const { t, i18n } = useAppTranslation();
@@ -34,13 +36,20 @@ export default function OnboardingDateField({
         testID={testID}
         accessibilityRole="button"
         accessibilityLabel={label}
+        disabled={disabled}
+        accessibilityState={{ disabled }}
         accessibilityValue={{
           text: value || t('driverOnboarding.date.placeholder'),
         }}
         onPress={() => setOpen(true)}
         style={styles.field}
       >
-        <Text tone={date ? 'primary' : 'secondary'} style={styles.value}>
+        <Text
+          style={[
+            styles.value,
+            { color: date ? colors.textPrimary : colors.placeHolderColor },
+          ]}
+        >
           {date
             ? date.toLocaleDateString(
                 i18n.language === 'hi'
@@ -68,8 +77,8 @@ export default function OnboardingDateField({
         isDarkModeEnabled={resolvedTheme === 'dark'}
         themeVariant={resolvedTheme}
         buttonTextColorIOS={colors.primary}
-        date={date && date >= today ? date : today}
-        minimumDate={today}
+        date={date && (allowPast || date >= today) ? date : today}
+        minimumDate={allowPast ? undefined : today}
         confirmTextIOS={t('driverOnboarding.date.confirm')}
         cancelTextIOS={t('driverOnboarding.date.cancel')}
         onCancel={() => setOpen(false)}

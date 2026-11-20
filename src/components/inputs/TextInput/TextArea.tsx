@@ -59,7 +59,7 @@ const TextArea = ({
           minHeight={Platform.OS === 'ios' ? 20 * 5 : null}
           placeholder={placeHolder}
           defaultValue={defaultValue ?? ''}
-          placeholderTextColor={themeColor.gray}
+          placeholderTextColor={themeColor.placeHolderColor}
         />
       </View>
       {errorMsg != '' && <ErrorText errorMsg={errorMsg} />}

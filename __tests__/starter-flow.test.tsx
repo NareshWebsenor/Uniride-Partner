@@ -5,9 +5,13 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ASYNC_KEYS } from '@/constants/storage';
 import { readStartupDestination } from '@/service/startup';
+import { restoreDriverSession } from '@/service/driverSession';
 import SplashScreen from '@/screens/splash/SplashScreen';
 import HomeScreen from '@/screens/main/tab/HomeScreen';
 import { Button } from '@/components/ui';
+
+jest.mock('@/service/driverSession', () => ({ restoreDriverSession: jest.fn() }));
+jest.mock('@/service/config', () => ({ GOOGLE_API_KEY: '', GOOGLE_ROUTES_KEY: '' }));
 
 const mockNavigate = jest.fn();
 jest.mock('@react-navigation/native', () => ({
@@ -18,11 +22,12 @@ jest.mock('@react-navigation/native', () => ({
 
 beforeEach(async () => {
   jest.clearAllMocks();
+  jest.mocked(restoreDriverSession).mockResolvedValue(false);
   await AsyncStorage.clear();
 });
 
 test.each([null, 'old-session', '{corrupt'])(
-  'startup opens auth preview regardless of old session %s and incomplete verification',
+  'startup never trusts legacy plaintext session %s without a secure driver session',
   async token => {
     if (token !== null) {
       await AsyncStorage.multiSet([
@@ -32,11 +37,11 @@ test.each([null, 'old-session', '{corrupt'])(
       ]);
     }
     expect(await readStartupDestination()).toEqual({ name: 'LoginScreen' });
-    expect(await AsyncStorage.getItem(ASYNC_KEYS.ACCESS_TOKEN)).toBe(token);
+    expect(restoreDriverSession).toHaveBeenCalledTimes(1);
   },
 );
 
-test('same splash resets into auth preview after its branded transition', async () => {
+test('splash waits for secure startup restoration before opening login', async () => {
   jest.useFakeTimers();
   const reset = jest.fn();
   let tree!: Renderer.ReactTestRenderer;
@@ -79,4 +84,15 @@ test('Home opens offline with its availability action; preferences remain in Men
   await act(async () => {
     tree.unmount();
   });
+});
+
+
+test('startup restores a valid driver session into Home', async () => {
+  jest.mocked(restoreDriverSession).mockResolvedValueOnce(true);
+  expect(await readStartupDestination()).toEqual({ name: 'MainStack' });
+});
+
+test('startup propagates secure read failure so Splash can offer retry', async () => {
+  jest.mocked(restoreDriverSession).mockRejectedValueOnce(new Error('storage failure'));
+  await expect(readStartupDestination()).rejects.toThrow('storage failure');
 });

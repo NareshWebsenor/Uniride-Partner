@@ -20,12 +20,14 @@ export function EmailStep({
   onChange,
   onResend,
   remaining,
+  disabled = false,
 }: {
   email: string;
   code: string;
   onChange: (value: string) => void;
   onResend: () => void;
   remaining: number;
+  disabled?: boolean;
 }) {
   const { t } = useAppTranslation();
   const styles = useThemedStyles(createStyle);
@@ -42,7 +44,8 @@ export function EmailStep({
         testID="email-otp"
         value={code}
         onChangeText={onChange}
-        otpLength={4}
+        otpLength={6}
+        isEditable={!disabled}
         accessibilityLabel={t('partnerAuth.otpLabel')}
       />
       <Text tone="secondary" variant="caption">
@@ -57,7 +60,7 @@ export function EmailStep({
             : t('partnerAuth.resend')
         }
         onPress={onResend}
-        disabled={remaining > 0}
+        disabled={remaining > 0 || disabled}
         variant="secondary"
         style={styles.resend}
       />
@@ -78,11 +81,13 @@ export function MobileStep({
   country,
   onPhone,
   onCountry,
+  disabled = false,
 }: {
   phone: string;
   country: Country;
   onPhone: (value: string) => void;
   onCountry: (value: Country) => void;
+  disabled?: boolean;
 }) {
   const { t } = useAppTranslation();
   const styles = useThemedStyles(createStyle);
@@ -100,6 +105,8 @@ export function MobileStep({
       <View style={styles.row}>
         <Pressable
           accessibilityRole="button"
+          disabled={disabled}
+          accessibilityState={{ disabled }}
           accessibilityLabel={t('ui.selectCountry')}
           accessibilityValue={{
             text: t(`partnerAuth.countries.${country.key}`),
@@ -116,6 +123,7 @@ export function MobileStep({
         </Pressable>
         <CustomTextInput
           testID="mobile-number"
+          isEditable={!disabled}
           style={styles.flex}
           containerStyle={styles.input}
           accessibilityLabel={t('ride.auth.phoneInputLabel')}
@@ -123,7 +131,7 @@ export function MobileStep({
           keyboardType="phone-pad"
           autoComplete="tel-national"
           value={phone}
-          maxLength={10}
+          maxLength={25}
           onChangeText={value => onPhone(value.replace(/\D/g, ''))}
           left={<Text>{country.dial}</Text>}
         />
@@ -158,11 +166,13 @@ export function PasswordStep({
   confirm,
   onPassword,
   onConfirm,
+  disabled = false,
 }: {
   password: string;
   confirm: string;
   onPassword: (value: string) => void;
   onConfirm: (value: string) => void;
+  disabled?: boolean;
 }) {
   const { t } = useAppTranslation();
   const styles = useThemedStyles(createStyle);
@@ -177,6 +187,7 @@ export function PasswordStep({
       />
       <Text style={styles.body}>{t('partnerAuth.passwordDescription')}</Text>
       <CustomTextInput
+        isEditable={!disabled}
         secureTextEntry
         placeholder={t('partnerAuth.passwordPlaceholder')}
         containerStyle={styles.input}
@@ -186,6 +197,7 @@ export function PasswordStep({
         onChangeText={onPassword}
       />
       <CustomTextInput
+        isEditable={!disabled}
         secureTextEntry
         placeholder={t('partnerAuth.passwordPlaceholder')}
         containerStyle={styles.input}
@@ -199,7 +211,7 @@ export function PasswordStep({
             : undefined
         }
       />
-      <PasswordChecklist value={password} />
+      {!disabled && <PasswordChecklist value={password} />}
     </View>
   );
 }

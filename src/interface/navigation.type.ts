@@ -14,7 +14,9 @@ export type TMainTabs = {
 
 export type TRootStack = TDriverOnboardingStack & {
   SplashScreen: undefined;
-  LoginScreen: undefined;
+  LoginScreen: { email?: string; register?: boolean; notice?: string } | undefined;
+  DriverRegistrationScreen: undefined;
+  RegistrationStatusScreen: { state: 'pending_review' | 'activation_pending'; email: string };
   // Preserve this route ID for the deferred biometric gate and existing callers.
   MainStack: undefined;
   SettingsScreen: undefined;

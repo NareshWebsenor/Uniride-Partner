@@ -41,7 +41,7 @@ export default function DateTimeInput({
         onPress={() => setOpen(true)}
       >
         <Text
-          style={[styles.text, { color: date == undefined ? themeColor.textSecondary : themeColor.textPrimary }]}
+          style={[styles.text, { color: date == undefined ? themeColor.placeHolderColor : themeColor.textPrimary }]}
         >
           {date != undefined
             ? formatDate(date, mode === 'time' ? 'hh:mm A' : 'DD/MM/YYYY')

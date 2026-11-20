@@ -5,13 +5,11 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { Text } from '@/components/ui';
 import Button from '@/components/buttons/CustomButton';
-import Checkbox from '@/components/inputs/Checkbox/Checkbox';
 import CustomTextInput from '@/components/inputs/TextInput/CustomTextInput';
 import StackHeader from '@/components/headers/StackHeader';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { isValidEmail } from '@/utils/authPreview';
-import { GoogleMark } from './AuthFields';
 import type { themeType } from '@/interface/theme.type';
 import { fSize, hp, wp } from '@/utils/responsive.utils';
 import { useThemedStyles } from '@/hooks/useThemedStyles';
@@ -30,23 +28,29 @@ export default function AuthEntry({
   onUnavailable,
   register,
   onModeChange,
+  busy = false,
+  error,
+  cooldown = 0,
 }: {
   draft: RegistrationDraft;
   onChange: (value: RegistrationDraft) => void;
   onRegister: () => void;
-  onLogin: () => void;
+  onLogin: (password: string) => void;
   onUnavailable: () => void;
   register: boolean;
   onModeChange: (value: boolean) => void;
+  busy?: boolean;
+  error?: string;
+  cooldown?: number;
 }) {
   const [password, setPassword] = useState('');
-  const [remember, setRemember] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const { t } = useAppTranslation();
   const styles = useThemedStyles(createStyle);
   const colors = useThemeColor();
   const emailError = submitted && !isValidEmail(draft.email);
   const continueFlow = () => {
+    if (busy || cooldown > 0) return;
     setSubmitted(true);
     if (
       !isValidEmail(draft.email) ||
@@ -54,7 +58,7 @@ export default function AuthEntry({
     )
       return;
     if (register) onRegister();
-    else onLogin();
+    else onLogin(password);
   };
   return (
     <>
@@ -94,6 +98,7 @@ export default function AuthEntry({
               <Pressable
                 key={String(value)}
                 testID={value ? 'register-tab' : 'login-tab'}
+                disabled={busy}
                 accessibilityRole="tab"
                 accessibilityState={{ selected: register === value }}
                 style={register === value ? styles.activeTab : styles.tab}
@@ -116,34 +121,19 @@ export default function AuthEntry({
           <View style={styles.fields}>
             {register && (
               <View style={styles.row}>
-                <CustomTextInput
-                  testID="first-name"
-                  style={styles.flex}
-                  label={t('ride.auth.firstName')}
-                  placeholder={t('ride.auth.firstNamePlaceholder')}
-                  value={draft.firstName}
-                  maxLength={60}
-                  autoComplete="given-name"
+                <CustomTextInput testID="first-name" style={styles.flex} isEditable={!busy}
+                  label={t('ride.auth.firstName')} placeholder={t('ride.auth.firstNamePlaceholder')}
+                  value={draft.firstName} maxLength={60} autoComplete="given-name"
                   onChangeText={firstName => onChange({ ...draft, firstName })}
-                  errorMsg={
-                    submitted && !draft.firstName.trim()
-                      ? t('ride.validation.firstName')
-                      : undefined
-                  }
-                />
-                <CustomTextInput
-                  testID="last-name"
-                  style={styles.flex}
-                  label={t('partnerAuth.lastName')}
-                  placeholder={t('ride.auth.lastNamePlaceholder')}
-                  value={draft.lastName}
-                  maxLength={60}
-                  autoComplete="family-name"
-                  onChangeText={lastName => onChange({ ...draft, lastName })}
-                />
+                  errorMsg={submitted && !draft.firstName.trim() ? t('ride.validation.firstName') : undefined} />
+                <CustomTextInput testID="last-name" style={styles.flex} isEditable={!busy}
+                  label={t('partnerAuth.lastName')} placeholder={t('ride.auth.lastNamePlaceholder')}
+                  value={draft.lastName} maxLength={60} autoComplete="family-name"
+                  onChangeText={lastName => onChange({ ...draft, lastName })} />
               </View>
             )}
             <CustomTextInput
+              isEditable={!busy}
               testID="email"
               label={t('partnerAuth.email')}
               placeholder={t('partnerAuth.emailPlaceholder')}
@@ -158,6 +148,7 @@ export default function AuthEntry({
             />
             {!register && (
               <CustomTextInput
+                isEditable={!busy}
                 secureTextEntry
                 placeholder={t('partnerAuth.passwordPlaceholder')}
                 containerStyle={styles.input}
@@ -173,45 +164,16 @@ export default function AuthEntry({
               />
             )}
           </View>
-          {!register && (
-            <View style={styles.row}>
-              <Checkbox
-                containerStyle={styles.flex}
-                value={remember}
-                onChange={setRemember}
-                label={t('partnerAuth.remember')}
-                labelStyle={styles.small}
-              />
-              <Pressable
-                style={styles.linkButton}
-                accessibilityRole="button"
-                onPress={onUnavailable}
-              >
-                <Text style={styles.forgotLink}>{t('partnerAuth.forgot')}</Text>
-              </Pressable>
-            </View>
-          )}
+          {error ? <Text tone="error" accessibilityRole="alert">{error}</Text> : null}
+          {cooldown > 0 ? <Text tone="secondary">{t('partnerAuth.resendIn', { count: cooldown })}</Text> : null}
           <Button
             isGradiantRequired={false}
             testID="entry-continue"
+            loading={busy}
+            disabled={busy || cooldown > 0}
             title={t('ride.auth.continue')}
             onPress={continueFlow}
             style={register ? styles.registerAction : styles.loginAction}
-          />
-          <View style={styles.divider}>
-            <View style={styles.line} />
-            <Text tone="secondary" variant="caption">
-              {t('partnerAuth.or')}
-            </Text>
-            <View style={styles.line} />
-          </View>
-          <Button
-            isGradiantRequired={false}
-            title={t('partnerAuth.google')}
-            variant="secondary"
-            style={styles.noMargin}
-            iconContent={<GoogleMark />}
-            onPress={onUnavailable}
           />
           <View style={styles.customerSpace} />
           <Pressable

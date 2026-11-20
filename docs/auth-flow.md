@@ -1,167 +1,209 @@
 # Module 2 — Auth Flow
 
-Module 2 partner authentication UI preview document karta hai.
-[Module index aur Module 1 — Splash aur Biometric](starter-setup.md).
-Module 1 ke splash ke baad ye flow open hota hai; biometric gate abhi deferred hai.
+[Module index aur Module 1 — Splash aur Biometric](starter-setup.md) ·
+[Module 3 — Driver Onboarding](driver-onboarding.md)
 
-## Scope and journeys
+Status: driver email verification and email/password login are connected to the
+provided API contract. Native account creation/login against a real test account
+has not been verified. Biometric app lock remains deferred.
 
-Startup restores theme/language, shows the existing splash, then opens LoginScreen.
-Every cold start returns to this preview, irrespective of old session tokens.
+## Active journeys
 
-- Login: email + nonempty password → Home (preview navigation only).
-- Register: first name, optional last name, email → four-digit email code →
-  mobile number → password/confirmation → terms checkbox + Continue → Fleet/Own selection in
-  [Module 3 — Driver Onboarding](driver-onboarding.md).
-- No SMS OTP or real KYC verification. Driver onboarding UI follows registration in Module 3.
-- Home retains Settings for theme/language selection.
+Startup hydrates preferences, shows Splash, and restores a valid driver session
+from Keychain. An active session opens Home; otherwise LoginScreen resumes an
+editable registration or its saved review state, when available.
 
-No API is called, email sent, credential checked, account created or token stored.
-Any four digits unlock the next UI step. This is not an authentication boundary.
-Remember me is visual state only. Drafts are component state and disappear on unmount.
+- Login: email + password → `POST /v1/driver-auth/login` → secure session → Home.
+- Registration keeps the original product fields/screens: first name, optional
+  last name, email → six-digit email OTP → mobile → Create password → terms →
+  API-defined personal/document form → Fleet/Own → review → Under review.
+- Create password is active after email verification and the optional mobile step.
+  Password and confirmation must match the existing client checklist (8+ characters,
+  a digit and a non-digit); the server remains authoritative. Continue calls
+  `POST /v1/driver-registration/password` with `{ token, password }` and advances
+  only after `{ password_set: true }`. Confirm password is never sent. Both inputs
+  are memory-only and cleared after success; the credential stores only a
+  non-secret `passwordSet` marker to resume without bypassing unfinished setup.
+- `email-code` and resend send `{ first_name, last_name, email }`. First/last name
+  and local agreement also prefill matching enabled `first_name`, `last_name`,
+  `accept_terms` fields without overwriting existing server answers.
+- Mobile stays optional. Empty Continue skips the phone request. A filled number
+  calls `setRegistrationPhone(token, phone)` in `src/service/rest/auth.ts`:
+  `POST /v1/driver-registration/phone` with `{ token, phone }`, combining the
+  selected country dial code and national digits (for example `+919812345678`).
+  Only a valid `{ phone: string }` response advances to password. Pending requests
+  disable editing and repeated Continue taps; failures stay visible for retry,
+  and expired credentials return to email verification. Server validation remains
+  authoritative. Phone is not cached locally or included in dynamic form answers.
+- Google sign-in is hidden. SMS verification and Forgot password have no driver
+  backend. The phone endpoint saves the number without SMS verification. The app never
+  offers the admin-only staff/hybrid/freelancer assignment.
 
-## Components and decisions
+## API and environment
 
-Auth filenames identify their existing roles; existing auth components stay together.
-Module 3 adds its own named screens/routes outside the auth folder.
-`LoginScreen.tsx` exports `LoginScreen`; navigation types, the root navigator and
-splash startup destination all use the `LoginScreen` route ID. `LoginRegisterScreen.tsx` retains both tabs; `OtpVerificationSteps.tsx`
-retains OTP, mobile, password and terms steps together. File and root route names
-are aligned. Tabs and auth-step Back behavior are unchanged; registration now hands off to Module 3, while login opens Home.
+The active driver service uses `/v1`, independently of the preserved legacy
+customer `/api/v1` client. Configure the ignored root `.env` using `.env.example`:
 
-- `src/screens/auth/LoginScreen.tsx`: local steps, Android Back, preview completion,
-  resend cooldown and footer. Uses the existing `AppBackground` wrapper.
-  Login/register and all verification steps inherit this one screen wrapper.
-  Entry uses `extendUnderStatusBar`: the hero image reaches the top edge behind
-  a transparent status bar. Safe-area padding is applied inside the hero so its
-  text stays clear of the cutout. Verification steps retain normal top insets.
-  The entry hero is absolutely positioned behind a full-viewport scroller. Its
-  transparent top spacing initially reveals the image; the opaque rounded
-  Login/Register panel moves upward over the image as the user scrolls, then its
-  remaining content scrolls normally. The hero never moves. Panel height follows
-  its content, without a forced viewport minimum or expanding spacers.
-  keyboard-controller's `KeyboardAwareScrollView` reveals focused fields.
-  Google and Customer/Book Ride are separated by a fixed responsive gap, not an
-  expanding spacer. Book Ride has only the normal panel padding beneath it.
-  Entry does not nest a keyboard-avoiding view around that keyboard-aware scroller.
-- `LoginRegisterScreen.tsx`: login/register tabs, hero and validated entry forms.
-- `OtpVerificationSteps.tsx`: email, mobile, password and terms composition.
-- `AuthFields.tsx`: password checklist and themed Google mark only.
-- Each screen/component declares its own required styles below the component.
-- `src/utils/authPreview.ts`: pure email masking and validation helpers.
-- `src/service/startup.ts`: unconditional preview destination; session helper
-  remains available to the inactive biometric implementation.
-
-Custom components are the screen-facing API: `AppBackground`, `StackHeader`,
-`CustomTextInput`, `CustomButton`, and the existing custom checkbox adapter.
-The existing canonical UI components remain underneath those adapters.
-Screen styles use `createStyle(theme: themeType) => StyleSheet.create(...)`,
-consumed through `useThemedStyles(createStyle)`. Colors and state variants belong
-in that factory; JSX references named styles instead of inline style objects.
-Keep the factory at the bottom of the same screen/component file, not in a
-separate stylesheet file. Splash and custom components follow the same pattern.
-Safe-area values are inputs to AppBackground's style factory.
-Screens do not implement native text inputs or a second password toggle.
-`CustomTextInput.otpLength` renders digit cells around the shared input, supporting
-paste/autofill. `left` supplies the mobile country-code prefix. StackHeader accepts
-optional divider/subtitle styling; AppBackground accepts a background override and
-uses the resolved theme for status bar text. Existing component defaults are retained
-except the header now uses semantic typography/spacing and supports wrapping titles.
-
-The original preview added no dependencies or native identity/signing changes.
-Colors now come from the user-edited palettes in `src/utils/theme.utils.ts`.
-Forgot Password, Book Ride and Terms/Privacy text links use `brandLink`, whose
-dark-blue Light value and light-blue Dark value remain readable on their surfaces. Button fills
-continue to use `primary`. Existing translation keys are reused; new copy lives
-under `partnerAuth` in both English/Hindi resources. This follows `.agents` rules.
-
-`src/assets/images/auth-coast.png` is a generated reference-inspired coastal car
-banner, not the original screenshot asset. It has no embedded interface text.
-
-## Validation and edge cases
-
-- First name required, last name optional; names capped at 60 characters.
-- Email trimmed for validation/display. Example: test@gmail.com → t**t@gmail.com.
-  Short local parts are masked too; original email stays out of the OTP screen.
-- Four-digit code required to continue. Resend clears it, starts a 30-second cooldown
-  and shows unavailable feedback; it never reports actual delivery.
-- Changing email resets code/cooldown. Back preserves draft values.
-- Country selector: India, Bahamas, US, UK. Ten-digit national number excludes dial
-  code. This UI list is not a global phone validation contract.
-- Password: eight characters, a digit, a non-digit, matching confirmation. Live
-  checks and visibility toggle use existing components. No credential persistence.
-- Agreement required. Legal links, Google, Forgot Password and Book Ride show
-  translated unavailable feedback until actual destinations exist.
-- Scrollable forms, safe areas, scalable text and accessibility states enabled.
-  LoginScreen uses `KeyboardAvoidingView` from `react-native-keyboard-controller`
-  with `behavior="padding"` on Android and iOS. `automaticOffset` measures its
-  screen position inside AppBackground's safe-area padding. Only form content
-  is inside the avoiding view. Back/Continue stay in a sibling footer at the screen
-  bottom and are covered by the open keyboard instead of moving above it.
-  Dismissing the keyboard reveals the footer in its original position.
-- Only safe step/completion event codes enter the dev-only logger.
-
-## Verification
-
-### Keyboard controller integration
-
-`react-native-keyboard-controller@^1.23.1` was already installed (lockfile resolves
-1.23.1). `App.tsx` now mounts one `KeyboardProvider` around the application,
-inside the existing SafeAreaProvider. The installed Reanimated dependency and
-Worklets Babel plugin satisfy the existing animation setup. Jest uses the
-library's supplied mock; unit tests do not simulate native keyboard animations.
-See the [library setup](https://kirillzyusko.github.io/react-native-keyboard-controller/docs/installation)
-and [avoiding-view API](https://kirillzyusko.github.io/react-native-keyboard-controller/docs/api/components/keyboard-avoiding-view).
-
-Native binaries need rebuilding after installing the package. For Android, use
-`./gradlew :app:assembleDebug -PreactNativeArchitectures=arm64-v8a` from `android/`
-for the verified ARM64 device ABI. For iOS, run
-`bundle exec pod install` from `ios/` before building. Validate keyboard open,
-input switching, scrolling, footer access and dismissal on both platforms.
-
-Integration verification (2026-11-17):
-
-- Android command above: exit 0, native keyboard-controller compiled/autolinked;
-  debug APK installed on `emulator-5554` (ARM64, Android API 36).
-- Emulator login form: email keyboard opening, scrolling to Continue, switching
-  to password keyboard and Android Back dismissal inspected successfully.
-  Screenshots: `/private/tmp/uniride-keyboard-open.png`,
-  `/private/tmp/uniride-keyboard-scrolled.png`,
-  `/private/tmp/uniride-keyboard-password.png`,
-  `/private/tmp/uniride-keyboard-dismissed.png`.
-- Metro runs on 8081 with `adb reverse tcp:8081 tcp:8081` for this emulator.
-- `yarn test --runInBand`: 35 pass / same eight baseline failures.
-  `yarn type-check`: same three pre-existing errors; `yarn check:ui` and
-  `git diff --check` pass. Existing ESLint config remains absent.
-- iOS setup is blocked before this integration can be validated: Ruby 3.2
-  `bundle exec pod install` exits 1 because locked gems (including CocoaPods
-  1.15.2) are missing. Simulator build below exits 65 because
-  `Pods-UniRidePartner.debug.xcconfig` and Pods file lists are absent.
-  This is an existing dependency-setup problem, not a keyboard compilation error.
-  Physical-device and iOS keyboard checks remain pending.
-
-```sh
-xcodebuild -workspace ios/UniRidePartner.xcworkspace \
-  -scheme UniRidePartner -configuration Debug -sdk iphonesimulator \
-  -destination 'generic/platform=iOS Simulator' \
-  -derivedDataPath /private/tmp/uniride-keyboard-ios-build \
-  CODE_SIGNING_ALLOWED=NO build
+```dotenv
+DRIVER_API_BASE_URL_DEV=https://19sntv0h-3000.inc1.devtunnels.ms
+DRIVER_API_BASE_URL_PROD=
+UNIRIDE_WORKSPACE=uniride
 ```
 
-`__tests__/partner-auth.test.tsx`: masking, validation, registration/back flow,
-resend cooldown, login preview and live Hindi/Dark changes. Startup tests expect
-LoginScreen. Commands: `yarn test --runInBand`, `yarn type-check`, `yarn check:ui`.
+Use the origin only; `src/service/config.ts` appends `/v1`. Production origin is
+required at release. Every driver registration/auth request includes lower-case
+`X-Uniride-Workspace`; there is no tenant-ID parameter. JSON requests use
+`Content-Type: application/json`; file uploads use their actual supported MIME.
 
-Auth/startup focused run: 10/10 tests passed. Theme/translation guard and diff checks
-passed. Existing Android emulator + Metro exercised registration through Home;
-masked OTP, digit entry, password rules and agreement gating were inspected.
-OTP native-text duplication found during inspection was fixed in CustomTextInput.
-Physical-device and iOS checks were not run; no native files were changed.
+`src/service/config.ts` owns `ENDPOINTS.DRIVER_AUTH` and
+`ENDPOINTS.DRIVER_REGISTRATION`. `service/rest/auth.ts` supplies auth/registration
+functions through `_makeAxiosPostRequest` from `./index`; `registrationResponse.ts`
+validates response schemas. `driverRegistration.ts` only re-exports the functions
+for older imports. Active hooks import `auth.ts`.
 
-Repository baseline comparison on 2026-11-17 reproduced eight failures across the
-biometric gate, biometric service, legacy UI and logout suites. Existing type errors
-are in TextArea, CardImageComponent and ThemeProvider; ESLint configuration is absent.
-Do not confuse those baseline failures with passing auth/startup checks.
+Shared GET/POST helpers accept `{ api: 'driver' }` to select the separate Axios
+instance in `driverClient.ts`. This keeps the driver `/v1` origin, workspace,
+Keychain session, 30-second timeout, cancellation and `Retry-After` errors separate
+from the legacy customer `/api/v1` refresh interceptor. Auth/registration calls
+do not attach a login bearer. Authenticated driver calls additionally pass
+`authenticated: true`; a 401 clears that session without attempting refresh.
+Helpers return response bodies. Registration uploads pass a raw Blob and its MIME
+header, never multipart. Existing legacy helper calls retain their old behavior.
 
-See [starter setup](starter-setup.md) for Metro, device and recovery commands.
-Real auth needs partner API contracts and server verification before production use.
+Example service call (the registration form uses POST):
+
+```ts
+import { _makeAxiosPostRequest } from './index';
+import { ENDPOINTS } from '../config';
+
+const response = await _makeAxiosPostRequest(
+  ENDPOINTS.DRIVER_REGISTRATION.FORM,
+  { token },
+  { api: 'driver' },
+);
+```
+
+No new API logging is added; raw response debug prints have been removed from the
+auth service. Order APIs remain deferred until their backend contract is available.
+Screens use hooks/services, not direct HTTP. No dependency, signing,
+native identity or permission change is required by this integration.
+
+## Email verification and state routing
+
+`email-code` receives the names and email, then sends a six-digit code valid for ten minutes. Resend is disabled for
+60 seconds after a successful request; only the newest code is accepted by the
+server. A 429 extends the lock using `Retry-After`, including HTTP-date headers.
+The countdown uses wall-clock deadlines so background/resume does not reset it.
+
+At the user's explicit request, a valid six-digit `development_code` autofills
+only in `__DEV__`. Production discards the field and relies on emailed codes.
+Code verification is still performed by the API; there is no local acceptance.
+
+`verify` branches on its state:
+
+- `invited`: editable application; save registration token securely.
+- `changes_requested`: editable application; show the server reason and answers.
+- `pending_review`: Under review; no app login session is created.
+- `activation_pending`: Approved; explain the emailed browser activation link.
+- `active`: return to email/password login.
+
+After submit or reinstall, status is checked through email → code → verify again.
+The app does not poll with a consumed registration token. In-app activation/deep
+links are not implemented; follow the approval email for any remaining browser activation steps.
+
+## Secure sessions and failures
+
+`src/service/driverSession.ts` stores registration and login credentials in
+separate Keychain services scoped to workspace and API origin. Registration
+credentials contain the application identity, server expiry and password-set marker; they cannot
+unlock Home. Login stores the session, expiry and minimal driver response in
+Keychain. Zustand `authStore` owns the in-memory session without persisting tokens
+in AsyncStorage. Legacy plaintext auth keys are removed during session migration.
+
+Login expiry follows `expires_in` (contract: 12 hours). There is no refresh token.
+Expired sessions or authenticated 401 responses lock the protected routes and
+return to login. Registration 401/409 returns to fresh email verification; old
+codes are not silently replayed to recover an application state.
+
+Logout clears memory immediately and removes the secure session. A non-secret
+logout marker prevents a failed Keychain deletion from restoring that session
+on the next launch. Storage failures are surfaced instead of reported as success.
+Passwords, OTPs, tokens, profile details and raw API errors are never logged.
+
+Backend `error.message` is shown unchanged. Local network/configuration/storage
+failures use translated copy. Validation remains visible at the form; 413 maps
+to the five-MB upload limit, 429 locks repeated actions, and 503 can be retried.
+Concurrent submit/login taps are blocked while work is running.
+
+## Components and layout
+
+- `LoginScreen.tsx` composes the original steps with `useDriverAuth`.
+- `LoginRegisterScreen.tsx` retains both tabs, coastal hero and entry fields.
+- `OtpVerificationSteps.tsx` retains email/mobile/password/terms controls.
+- `useRetryCountdown.ts` handles resend/rate-limit deadlines.
+- `registrationEntry.ts` keeps only non-secret schema-prefill candidates.
+- `startup.ts` restores the secure driver session; the legacy customer-session
+  helper remains only for the inactive biometric implementation.
+
+The existing `AppBackground`, canonical UI adapters and one root KeyboardProvider
+are reused. The entry hero extends behind the transparent status bar; its own
+safe inset protects content. A full-viewport keyboard-aware scroller moves the
+rounded panel over the stationary hero. Verification steps use normal safe insets,
+scrollable content and a bottom footer outside keyboard avoidance.
+
+Theme colors remain centralized. English/Hindi/Spanish and saved text scaling
+apply to app-authored copy; server labels/options/messages are shown verbatim.
+`authPreview.ts` retains useful email masking/validation helpers; its name does
+not indicate that the active API authentication path is a preview.
+
+## Verification and remaining integration
+
+Phone endpoint/Continue update: `yarn test --watchman=false --runInBand
+__tests__/driver-api.test.ts __tests__/partner-auth.test.tsx` passes 69/69 tests.
+Coverage includes exact phone request headers/body, malformed responses, optional
+skip, save-before-navigation, duplicate taps, failure/retry and missing credentials.
+`yarn check:ui` and `git diff --check` pass. `yarn type-check` still reports the
+two pre-existing TextArea/CardImageComponent errors; `yarn lint` cannot run because
+ESLint configuration is missing. Live phone API and device checks remain unrun.
+
+Latest Axios/service-organization update: 92/92 tests pass across five focused
+auth/API/session/registration/upload suites. These exercise real Axios request
+serialization and response transforms through a mocked adapter, driver-vs-legacy
+helper routing, JSON/raw-byte payloads, cancellation, timeout and session handling.
+Full `yarn test --watchman=false --runInBand`: 326 pass, 8 existing failures in
+legacy logout, shared UI and deferred biometric tests. `yarn type-check` reports
+the same two baseline UI errors; `yarn lint` is blocked by missing ESLint config.
+`git diff --check` passes. No live account requests or native builds were run for
+this transport refactor.
+
+Previous password/names/optional-mobile update: 104/104 focused tests pass across
+seven auth/API/session/form/localization suites. These cover exact request bodies,
+password success/failure/retry and duplicate prevention, blank/filled mobile,
+legacy phone omission, secure password-set marker and restart routing.
+Type-check still reports only the two baseline errors below; UI rules/diff checks
+pass. This endpoint update has not been exercised with an authorized live account.
+
+API/session, auth-hook, registration-flow/draft, dynamic field, upload and vehicle
+suites cover the contract with mocked networking. Previous full-integration focused
+run: 138/138 pass across 13 suites. Previous full regression: 311 pass, 8 existing failures in legacy logout,
+shared UI and deferred biometric suites. Run targeted suites with `yarn test --watchman=false
+--runInBand`, plus `yarn type-check`, `yarn check:ui` and `git diff --check`.
+
+Android emulator auth entry and restored First/Last name fields were inspected
+using the existing Metro server (`/private/tmp/driver-register-restored.png`).
+Unauthenticated `GET /v1/driver/me` returned 401, establishing endpoint reachability
+only. No approved test email/account was supplied, so real email delivery,
+verification, authenticated login, document upload and final submission remain
+unverified. Do not treat the reachability check as successful authentication.
+
+Baseline TypeScript issues remain in TextArea and CardImageComponent; ESLint
+configuration is absent. No new native build was needed for this JS integration.
+UI theme/translation guard and `git diff --check` pass; type-check has only the
+two baseline errors named above.
+Physical-device and iOS account-flow validation remain pending.
+
+The previous UI-only four-digit OTP and direct-to-Home registration were replaced.
+Historical keyboard verification used Android ARM64/API 36 and existing
+`react-native-keyboard-controller`; iOS previously failed dependency setup because
+locked gems/Pods files were missing. These earlier checks do not validate the new
+API journey. Device/build/recovery commands remain in [shared setup](starter-setup.md).

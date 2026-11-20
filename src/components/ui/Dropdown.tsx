@@ -7,6 +7,7 @@ import {
   ViewStyle,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { useThemeColor } from '@/hooks/useThemeColor';
 import { wp } from '@/utils/responsive.utils';
 import { Button } from './Button';
 import { BottomSheet } from './Modal';
@@ -49,6 +50,7 @@ export function Dropdown({
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
   const { t } = useTranslation();
+  const colors = useThemeColor();
   const selected = options.find(option => option.value === value);
   const close = () => {
     setOpen(false);
@@ -71,7 +73,10 @@ export function Dropdown({
           trailingIcon ? styles.withTrailingIcon : undefined,
           buttonStyle,
         ]}
-        textStyle={buttonTextStyle}
+        textStyle={[
+          buttonTextStyle,
+          !selected && { color: colors.placeHolderColor },
+        ]}
         icon={trailingIcon}
       />
       {error ? (

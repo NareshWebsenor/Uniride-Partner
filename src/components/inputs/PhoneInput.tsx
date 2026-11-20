@@ -60,7 +60,7 @@ const PhoneInput: React.FC<PhoneInputProps> = ({
           <TextInput
             style={styles.textInput}
             placeholder={placeholder ?? t('ui.phonePlaceholder')}
-            placeholderTextColor={themeColor.textS2}
+            placeholderTextColor={themeColor.placeHolderColor}
             value={value}
             onChangeText={onChangeText}
             keyboardType="phone-pad"

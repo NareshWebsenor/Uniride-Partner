@@ -1,8 +1,9 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ASYNC_KEYS } from '@/constants/storage';
 import { useAuthStore } from '@/store/authStore';
+import { restoreDriverSession } from './driverSession';
 
-export type StartupDestination = { name: 'LoginScreen' };
+export type StartupDestination = { name: 'LoginScreen' | 'MainStack' };
 
 function hasStoredToken(raw: string | null): boolean {
   if (!raw?.trim()) {
@@ -48,8 +49,7 @@ export async function hasActiveCustomerSession(): Promise<boolean> {
   return false;
 }
 
-// UI preview always starts at auth; it neither creates nor restores a session.
-// Keep the session helper above for the preserved, inactive biometric gate.
+// Customer helper remains for the deferred biometric gate; driver startup uses Keychain.
 export async function readStartupDestination(): Promise<StartupDestination> {
-  return { name: 'LoginScreen' };
+  return { name: await restoreDriverSession() ? 'MainStack' : 'LoginScreen' };
 }

@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import { useTextSizeStore } from "@/store/textSizeStore";
 import { TEXT_SIZE_SCALES } from "@/interface/textSize.type";
+import { useThemeColor } from "@/hooks/useThemeColor";
 
 const InsideText = createContext(false);
 
@@ -56,8 +57,10 @@ export type ScaledTextInput = NativeTextInput;
 export const ScaledTextInput = forwardRef<NativeTextInput, TextInputProps>(
   function ScaledTextInput({ style, ...props }, ref) {
     const scale = useTextSizeStore((state) => TEXT_SIZE_SCALES[state.size]);
+    const colors = useThemeColor();
     return (
       <NativeTextInput
+        placeholderTextColor={colors.placeHolderColor}
         {...props}
         ref={ref}
         style={[style, scaledStyle(StyleSheet.flatten(style), scale)]}

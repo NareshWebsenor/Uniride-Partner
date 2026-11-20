@@ -10,12 +10,15 @@ Feature documentation hamesha is stable numbering ko follow kare:
    [Splash/startup](#module-1--splash-aur-biometric),
    [biometric implementation](biometric-app-lock.md),
    [doosre app mein biometric integration](fingerprint-lock-integration.md).
-2. **Module 2 — Auth Flow**: login/register, email OTP, mobile, password aur terms.
-   Abhi UI preview hai; real authentication API/session creation active nahi hai.
+2. **Module 2 — Auth Flow**: driver login/register APIs, six-digit email OTP,
+   original name/mobile/password/terms screens aur secure session lifecycle.
+   Signup password uses the registration-password endpoint after OTP; mobile
+   stays optional and is never submitted.
    [Auth flow aur verification](auth-flow.md).
-3. **Module 3 — Driver Onboarding**: Fleet/Own choice first; Fleet needs only driver
-   documents. Own: city/referral → vehicle type → driver documents → vehicle
-   documents → bank details. UI preview only.
+3. **Module 3 — Driver Onboarding**: API-defined personal/document form → Fleet/Own
+   → optional vehicle catalog/papers → review → Under review. API integration
+   active; live account verification pending. Old city/bank/checklist previews
+   are retained but inactive and require supported schema/backend contracts.
    [Driver onboarding flow aur validation](driver-onboarding.md).
 4. **Module 4 — Home aur Bottom Tabs**: Home, Trips, Earnings, Inbox, Menu navigation
    active; Trips/Earnings/Inbox header-only. Menu has demo profile and working
@@ -26,9 +29,10 @@ Feature documentation hamesha is stable numbering ko follow kare:
    [Module 4 — Home Ride Preview](home-rides.md): availability, 15-second requests,
    Arriving and OTP/Start Trip; demo data, backend deferred.
 
-Current flow: **Module 1 (Splash) → Module 2 (Auth preview)**.
-Login → **Module 4 (Home aur Bottom Tabs)**; registration → **Module 3 (Driver
-Onboarding)** → Module 4. Theme/language controls Menu mein directly available hain.
+Current flow: **Module 1 (Splash) → secure session restore or Module 2 (Auth)**.
+Successful login → **Module 4 (Home aur Bottom Tabs)**; registration → **Module 3
+(Driver Onboarding)** → Under review → browser activation → Module 2 login.
+Theme/language controls Menu mein directly available hain.
 Module 1 mein biometric documentation hone ka matlab gate enabled hona nahi hai.
 
 Naye feature modules ko Module 5, Module 6, ... do; existing module IDs renumber
@@ -40,8 +44,9 @@ supporting document ko naya feature-module number mat do.
 
 `App.tsx` theme/language/text-size/notification preferences hydrate karta hai aur tab tak `SplashContent`
 dikhata hai. Uske baad `SplashScreen` branded transition ke liye 700ms wait karke
-`src/service/startup.ts` se destination leta hai. Current destination Module 2 ka
-`LoginScreen` hai; startup error par translated retry action available hai.
+`src/service/startup.ts` se destination leta hai. Valid Keychain driver session
+Module 4 kholta hai; otherwise Module 2 `LoginScreen` registration/status resume
+handle karta hai. Startup storage error par translated retry action available hai.
 
 Biometric implementation aur integration guide isi Module 1 ka part hain. Source
 preserved hai, lekin current startup par native biometric prompt request nahi hota.
@@ -49,10 +54,23 @@ Is documentation update se app-lock runtime enable nahi hota.
 
 ## Current flow
 
-Current startup opens [Module 2 — Auth Flow](auth-flow.md). Registration continues
-to [Module 3 — Driver Onboarding](driver-onboarding.md); login opens Home.
-No real auth API or biometric gate is active. This checkout's Android identity is
+Current startup restores a secure driver session or opens
+[Module 2 — Auth Flow](auth-flow.md). Registration continues to
+[Module 3 — Driver Onboarding](driver-onboarding.md); successful submission opens
+Under review, not Home. Driver auth APIs are integrated; biometric gate remains
+inactive. This checkout's Android identity is
 `com.uniride.partner`; use that package when launching the partner app.
+
+Registration uses the origin configured by `DRIVER_API_BASE_URL_DEV/PROD` plus
+`/v1`, with `UNIRIDE_WORKSPACE` as the workspace header. The old customer `/api/v1`
+transport is not used for driver auth. See Module 2 for environment, Keychain,
+expiry/401 behavior and the pending signup-password backend contract.
+
+Android emulator auth entry was verified; an unauthenticated driver/me probe
+returned 401 and confirmed reachability only. Live email delivery, authenticated
+login and application uploads/submission remain unverified without an approved
+test account. Historical verification sections below describe their named earlier
+increments, not the current API flow.
 
 ## Shared system navigation area
 
@@ -73,6 +91,9 @@ checked without the white strip (`/private/tmp/nav-dark.png`, `nav-home.png`,
 TextArea/CardImageComponent type errors remain.
 
 ## Earlier starter baseline
+
+Historical snapshot only. Its removed-screen/session behavior is superseded by
+the active Module 2/3 API integration described above.
 
 App preference hydration -> existing Uni Ride splash (700 ms) -> Home -> Settings.
 
@@ -102,8 +123,9 @@ The deferred gate still depends on `hasActiveCustomerSession`, `onLogout`, the
 `MainStack` route ID and Application's optional `onRouteChange` prop. Those
 compatibility boundaries remain; `MainStack` now renders Module 4 tabs and legacy
 session cleanup resets to Home. REST/session stores and native Keychain dependencies
-are retained for this source compatibility. OTP request/verification APIs and their
-screens have been removed. The gate must be decoupled from login/session state
+are retained for this source compatibility. Legacy customer OTP screens were
+removed in that baseline; current driver email-code verification is a separate
+active implementation. The gate must be decoupled from login/session state
 before a future standalone app-lock integration. Existing biometric documentation
 below describes the preserved implementation, not active starter behavior.
 
@@ -274,7 +296,7 @@ cd android
 
 APK: `android/app/build/outputs/apk/debug/app-debug.apk`.
 Install: `adb install -r android/app/build/outputs/apk/debug/app-debug.apk`.
-Launch: `adb shell am start -n com.uniride/.MainActivity`.
+Launch current partner app: `adb shell am start -n com.uniride.partner/.MainActivity`.
 
 ## Verification
 

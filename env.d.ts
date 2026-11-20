@@ -1,4 +1,7 @@
 declare module "@env" {
+  export const DRIVER_API_BASE_URL_DEV: string | undefined;
+  export const DRIVER_API_BASE_URL_PROD: string | undefined;
+  export const UNIRIDE_WORKSPACE: string | undefined;
   export const BASE_URL_DEV: string;
   export const BASE_URL_PROD: string;
   export const SOCKET_URL_DEV: string;

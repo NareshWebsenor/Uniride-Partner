@@ -1,4 +1,4 @@
-import axios, { type AxiosRequestConfig } from 'axios';
+import axios, { type AxiosRequestConfig, type AxiosResponse } from 'axios';
 import { API_URL } from '../config';
 import { ASYNC_KEYS } from '@/utils/contant.utils';
 import { getAsyncStorage } from '@/utils/helper.utils';
@@ -6,6 +6,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { refreshTokenRequest } from './CommonApi';
 import { useGeneralStore } from '@/store/generalStore';
 import { useAuthStore } from '@/store/authStore';
+import { driverRequest } from './driverClient';
 
 declare module 'axios' {
   export interface AxiosRequestConfig {
@@ -164,15 +165,35 @@ client.interceptors.response.use(
 );
 
 // ------------------ API WRAPPERS ------------------
-export const _makeAxiosGetRequest = (url: string, params = {}) =>
-  client.get(url, { params });
+type DriverRequestConfig = {
+  api: 'driver';
+  authenticated?: boolean;
+  headers?: Record<string, string>;
+  signal?: AbortSignal;
+};
+type RequestConfig = DriverRequestConfig | (AxiosRequestConfig & { api?: 'legacy' });
+
+export function _makeAxiosGetRequest<TResponse = unknown>(
+  url: string, params: Record<string, unknown>, config: DriverRequestConfig,
+): Promise<TResponse>;
+export function _makeAxiosGetRequest(
+  url: string, params?: Record<string, unknown>, config?: AxiosRequestConfig & { api?: 'legacy' },
+): Promise<AxiosResponse>;
+export function _makeAxiosGetRequest(
+  url: string, params: Record<string, unknown> = {}, config: RequestConfig = {},
+) {
+  if (config.api === 'driver') return driverRequest(url, { ...config, method: 'GET', params });
+  return client.get(url, { ...config, params });
+}
 
 export const _makeAxiosPostRequest = <TResponse = unknown>(
   url: string,
-  payload = {},
-  config: AxiosRequestConfig = {},
-): Promise<TResponse> =>
-  client.post(url, payload, config) as unknown as Promise<TResponse>;
+  payload: unknown = {},
+  config: RequestConfig = {},
+): Promise<TResponse> => {
+  if (config.api === 'driver') return driverRequest<TResponse>(url, { ...config, method: 'POST', body: payload });
+  return client.post(url, payload, config) as unknown as Promise<TResponse>;
+};
 
 export const _makeAxiosPutRequest = (url: string, payload = {}) =>
   client.put(url, payload);

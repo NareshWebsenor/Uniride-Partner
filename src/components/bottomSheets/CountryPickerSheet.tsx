@@ -69,7 +69,7 @@ const CountryPickerSheet: React.FC<CountryPickerSheetProps> = ({
           <TextInput
             style={styles.searchInput}
             placeholder={t('ui.searchCountry')}
-            placeholderTextColor={themeColor.textS2}
+            placeholderTextColor={themeColor.placeHolderColor}
             value={searchQuery}
             onChangeText={setSearchQuery}
           />

@@ -37,7 +37,7 @@ const lightPalette = {
 
   // Border / Placeholder
   borderColor: "#DFE2E7",
-  placeHolderColor: "#737B87",
+  placeHolderColor: "#737373",
 
   // Utility colors
   white: "#FFFFFF",
@@ -83,7 +83,7 @@ const darkPalette = {
 
   // === Border / Placeholder ===
   borderColor: "#2A2A2A",
-  placeHolderColor: "#7D7D7D",
+  placeHolderColor: "#737373",
 
   // === Utility colors ===
   white: "#FFFFFF",

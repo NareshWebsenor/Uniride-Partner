@@ -13,6 +13,9 @@ import HelpSupportScreen from "@/screens/main/menu/HelpSupportScreen";
 import SafetyScreen from "@/screens/main/menu/SafetyScreen";
 import LogoutSheet from "@/screens/main/menu/LogoutSheet";
 import { ChoiceRow } from "@/screens/main/menu/MenuDetailLayout";
+import { clearDriverSession } from '@/service/driverSession';
+
+jest.mock('@/service/driverSession', () => ({ clearDriverSession: jest.fn() }));
 
 const mockReset = jest.fn();
 const mockBack = jest.fn();
@@ -38,6 +41,7 @@ const row = (label: string) =>
   );
 beforeEach(async () => {
   jest.clearAllMocks();
+  jest.mocked(clearDriverSession).mockResolvedValue(undefined);
   await act(async () => {
     await i18n.changeLanguage("en");
     useLanguageStore.setState({ language: "en", error: null });
@@ -121,11 +125,12 @@ test("logout cancel preserves draft; confirmation clears draft and resets to Log
   expect(useDriverOnboardingStore.getState().bank.accountNumber).toBe("");
   expect(mockReset).toHaveBeenCalledWith({
     index: 0,
-    routes: [{ name: "LoginScreen" }],
+    routes: [{ name: "LoginScreen", params: { register: false } }],
   });
   expect(useTextSizeStore.getState().size).toBe("large");
   await act(async () => button("Log out").props.onPress());
   expect(mockReset).toHaveBeenCalledTimes(1);
+  expect(clearDriverSession).toHaveBeenCalledTimes(1);
 });
 
 test("language screen offers three languages and applies Spanish only after Save", async () => {

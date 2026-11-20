@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import { StyleSheet } from "react-native";
 import { useNavigation, type NavigationProp } from "@react-navigation/native";
 import { BottomSheet, Button, Text } from "@/components/ui";
@@ -8,6 +8,7 @@ import type { TRootStack } from "@/interface/navigation.type";
 import { useDriverOnboardingStore } from "@/store/driverOnboardingStore";
 import { logger } from "@/utils/logger";
 import { fSize } from "@/utils/responsive.utils";
+import { clearDriverSession } from '@/service/driverSession';
 
 export default function LogoutSheet({
   visible,
@@ -20,6 +21,8 @@ export default function LogoutSheet({
   const colors = useThemeColor();
   const navigation = useNavigation<NavigationProp<TRootStack>>();
   const leaving = useRef(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState(false);
   return (
     <BottomSheet
       visible={visible}
@@ -34,16 +37,24 @@ export default function LogoutSheet({
       <Button
         title={t("profile.log_out")}
         style={{ backgroundColor: colors.error }}
-        onPress={() => {
+        loading={busy}
+        onPress={async () => {
           if (leaving.current) return;
           leaving.current = true;
-          // Active auth is a local preview; no remote session/token is created by it.
-          useDriverOnboardingStore.getState().clear();
-          logger.info("menu.preview_logged_out", { scope: "auth" });
-          onClose();
-          navigation.reset({ index: 0, routes: [{ name: "LoginScreen" }] });
+          setBusy(true); setError(false);
+          try {
+            useDriverOnboardingStore.getState().clear();
+            await clearDriverSession();
+            logger.info('driver_session.logged_out', { scope: 'auth' });
+            onClose();
+            navigation.reset({ index: 0, routes: [{ name: 'LoginScreen', params: { register: false } }] });
+          } catch {
+            leaving.current = false;
+            setError(true);
+          } finally { setBusy(false); }
         }}
       />
+      {error ? <Text tone="error">{t('driverRegistration.storageFailed')}</Text> : null}
       <Button title={t("ui.cancel")} variant="secondary" onPress={onClose} />
     </BottomSheet>
   );

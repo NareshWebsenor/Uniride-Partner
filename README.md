@@ -1,7 +1,16 @@
 This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
 
-Partner UI preview: splash → login/register → email OTP → mobile → password → terms → Home.
-Auth is UI-only; no email delivery, server verification or session creation. Biometric source remains deferred.
+Driver auth APIs are integrated: email/password login restores a secure session;
+registration retains first/last name → email OTP → mobile → password screen →
+terms → dynamic application/vehicle form → Under review. Names are sent with
+the email-code request; password setup uses the registration-password API after
+OTP. Mobile is optional and excluded from all registration payloads. Home rides remain a demo; biometric source remains deferred.
+
+Set `DRIVER_API_BASE_URL_DEV`, `DRIVER_API_BASE_URL_PROD` and `UNIRIDE_WORKSPACE`
+using `.env.example`. API origins exclude `/v1`; the client adds it. Registration
+and login credentials use separate workspace-scoped Keychain entries. Live
+account/email/upload/submission verification requires an authorized test account.
+
 [Module index aur shared setup](docs/starter-setup.md) ·
 [Module 1 — Splash aur Biometric](docs/starter-setup.md#module-1--splash-aur-biometric) ·
 [Module 1 — Biometric implementation](docs/biometric-app-lock.md) ·

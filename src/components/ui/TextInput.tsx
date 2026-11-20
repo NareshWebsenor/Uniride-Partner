@@ -69,7 +69,7 @@ export const TextInput = forwardRef<NativeTextInput, TextInputProps>(
             ref={ref}
             accessibilityLabel={props.accessibilityLabel ?? label}
             editable={editable}
-            placeholderTextColor={colors.textSecondary}
+            placeholderTextColor={colors.placeHolderColor}
             selectionColor={colors.primary}
             onFocus={event => {
               setFocused(true);
