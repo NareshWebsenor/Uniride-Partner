@@ -64,7 +64,9 @@ function answer(value: unknown): value is Answer {
 function vehicleDraft(value: unknown): value is VehicleDraft {
   if (!record(value) || !record(value.documents)) return false;
   return ['type_id', 'brand_id', 'model_id', 'fuel_type_id', 'year', 'registration_number', 'colour']
-    .every(key => typeof value[key] === 'string') && Object.values(value.documents)
+    .every(key => typeof value[key] === 'string') &&
+    (value.category_id === undefined || typeof value.category_id === 'string') &&
+    Object.values(value.documents)
     .every(file => record(file) && typeof file.name === 'string' &&
       (file.expires_on === undefined || typeof file.expires_on === 'string'));
 }

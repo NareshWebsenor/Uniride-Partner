@@ -20,20 +20,27 @@ export const GOOGLE_API_KEY = GOOGLE_MAP_API_KEY;
 export const GOOGLE_ROUTES_KEY = GOOGLE_ROUTES_API_KEY;
 // Driver endpoints are /v1, independent of the retained legacy /api/v1 client.
 const driverOrigin = (__DEV__ ? DRIVER_API_BASE_URL_DEV : DRIVER_API_BASE_URL_PROD) ?? '';
-export const DRIVER_API_URL = driverOrigin.trim() ? `${driverOrigin.trim().replace(/\/+$/, '')}/v1` : '';
+export const DRIVER_BASE_URL = driverOrigin.trim().replace(/\/+$/, '');
+export const DRIVER_API_URL = DRIVER_BASE_URL ? `${DRIVER_BASE_URL}/v1` : '';
 export const DRIVER_WORKSPACE = (UNIRIDE_WORKSPACE ?? 'uniride').trim().toLowerCase();
 
 export const ENDPOINTS = {
   DRIVER_AUTH: {
     LOGIN: '/driver-auth/login',
   },
+  DRIVER: {
+    ME: '/driver/me',
+  },
   DRIVER_REGISTRATION: {
     EMAIL_CODE: '/driver-registration/email-code',
     VERIFY: '/driver-registration/verify',
-    PASSWORD: '/driver-registration/password',
     PHONE: '/driver-registration/phone',
-    FORM: '/driver-registration/form',
+    PHONE_VERIFY: '/driver-registration/phone/verify',
+    PASSWORD: '/driver-registration/password',
+    DRIVE_MODE: '/driver-registration/drive-mode',
+    INVITATION_CODE: '/driver-registration/invitation-code',
     VEHICLE_OPTIONS: '/driver-registration/vehicle-options',
+    FORM: '/driver-registration/form',
     FILES: '/driver-registration/files',
     SUBMIT: '/driver-registration/submit',
   },

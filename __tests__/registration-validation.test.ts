@@ -32,11 +32,11 @@ test.each([
   expect(errors({ type }, value)).toHaveProperty('field');
 });
 
-test('verified email overrides a tampered draft and unknown/disabled keys never submit', () => {
+test('email and disabled/unknown keys never enter submitted answers', () => {
   const fields = [field({ key: 'email', type: 'email', required: true }), field({ key: 'hidden', enabled: false })];
   const answers = { email: 'attacker@example.test', hidden: 'private', injected: 'extra' };
   expect(validateAnswers(fields, answers, email)).toEqual({});
-  expect(cleanAnswers(fields, answers, email)).toEqual({ email });
+  expect(cleanAnswers(fields, answers, email)).toEqual({});
 });
 
 test('select values are exact and number answer remains string', () => {

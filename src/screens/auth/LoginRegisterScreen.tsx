@@ -15,8 +15,6 @@ import { fSize, hp, wp } from '@/utils/responsive.utils';
 import { useThemedStyles } from '@/hooks/useThemedStyles';
 
 export type RegistrationDraft = {
-  firstName: string;
-  lastName: string;
   email: string;
 };
 
@@ -52,11 +50,7 @@ export default function AuthEntry({
   const continueFlow = () => {
     if (busy || cooldown > 0) return;
     setSubmitted(true);
-    if (
-      !isValidEmail(draft.email) ||
-      (register ? !draft.firstName.trim() : !password)
-    )
-      return;
+    if (!isValidEmail(draft.email) || (!register && !password)) return;
     if (register) onRegister();
     else onLogin(password);
   };
@@ -119,19 +113,6 @@ export default function AuthEntry({
             ))}
           </View>
           <View style={styles.fields}>
-            {register && (
-              <View style={styles.row}>
-                <CustomTextInput testID="first-name" style={styles.flex} isEditable={!busy}
-                  label={t('ride.auth.firstName')} placeholder={t('ride.auth.firstNamePlaceholder')}
-                  value={draft.firstName} maxLength={60} autoComplete="given-name"
-                  onChangeText={firstName => onChange({ ...draft, firstName })}
-                  errorMsg={submitted && !draft.firstName.trim() ? t('ride.validation.firstName') : undefined} />
-                <CustomTextInput testID="last-name" style={styles.flex} isEditable={!busy}
-                  label={t('partnerAuth.lastName')} placeholder={t('ride.auth.lastNamePlaceholder')}
-                  value={draft.lastName} maxLength={60} autoComplete="family-name"
-                  onChangeText={lastName => onChange({ ...draft, lastName })} />
-              </View>
-            )}
             <CustomTextInput
               isEditable={!busy}
               testID="email"

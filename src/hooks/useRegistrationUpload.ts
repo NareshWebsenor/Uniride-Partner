@@ -5,6 +5,7 @@ import { useAppTranslation } from '@/hooks/useAppTranslation';
 import { uploadRegistrationFile } from '@/service/rest/auth';
 import { DriverApiError } from '@/service/rest/driverClient';
 import { REGISTRATION_FILE_LIMIT, REGISTRATION_FILE_TYPES } from '@/utils/registrationValidation';
+import { logger } from '@/utils/logger';
 import type { LocalUpload } from '@/interface/driverOnboarding.type';
 
 type UploadSource = 'camera' | 'gallery' | 'document';
@@ -64,7 +65,18 @@ export function useRegistrationUpload(options: UploadOptions) {
         const image = source === 'camera'
           ? await ImagePicker.openCamera(imageOptions)
           : await ImagePicker.openPicker(imageOptions);
-        file = { uri: image.path, mime: image.mime, name: image.filename ?? 'upload.jpg', size: image.size };
+        const rawPath = image.path || image.sourceURL || '';
+        const uri = !rawPath || /^(file|content):\/\//.test(rawPath)
+          ? rawPath
+          : `file://${rawPath}`;
+        const rawMime = (image.mime || 'image/jpeg').toLowerCase();
+        const mime = rawMime === 'image/jpg' ? 'image/jpeg' : rawMime;
+        file = {
+          uri,
+          mime,
+          name: image.filename ?? 'upload.jpg',
+          size: Number.isFinite(image.size) ? image.size : 0,
+        };
       }
       if (!current() || !file) return;
       if (!REGISTRATION_FILE_TYPES.includes(file.mime)) {
@@ -87,11 +99,24 @@ export function useRegistrationUpload(options: UploadOptions) {
         failure.code === errorCodes.OPERATION_CANCELED || failure.code === 'E_PICKER_CANCELLED'
       );
       if (cancelled) return;
+      logger.warn('registration_upload.failed', {
+        scope: uploading ? 'upload' : 'pick',
+        status: failure instanceof DriverApiError ? failure.status : 0,
+        code: failure instanceof DriverApiError ? failure.code : 'unknown',
+      });
       setCanRetry(uploading && Boolean(selected.current));
-      setError(failure instanceof DriverApiError && failure.message
+      const baseMessage = failure instanceof DriverApiError && failure.message
         ? failure.message : failure instanceof DriverApiError && failure.status === 413
           ? t('driverRegistration.uploads.tooLarge')
-          : t(uploading ? 'driverRegistration.uploads.failed' : 'driverRegistration.uploads.pickFailed'));
+          : t(uploading ? 'driverRegistration.uploads.failed' : 'driverRegistration.uploads.pickFailed');
+      const devHint =
+        __DEV__ &&
+        failure instanceof DriverApiError &&
+        !failure.message &&
+        failure.status !== 413
+          ? ` (${failure.code}:${failure.status})`
+          : '';
+      setError(`${baseMessage}${devHint}`);
       if (uploading) callbacks.current.onApiError(failure);
     } finally {
       if (current()) { running.current = false; setBusy(false); callbacks.current.onBusyChange?.(false); }

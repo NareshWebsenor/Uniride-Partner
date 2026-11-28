@@ -10,6 +10,8 @@ export interface ThemeColors {
   border: string;
   primary: string;
   onPrimary: string;
+  chatOutgoing: string;
+  onChatOutgoing: string;
   tabActiveBackground: string;
   tabInactive: string;
   toggleActive: string;
@@ -17,6 +19,8 @@ export interface ThemeColors {
   driverAvailable: string;
   onDriverAvailable: string;
   success: string;
+  successSurface: string;
+  errorSurface: string;
   warning: string;
   error: string;
   disabled: string;

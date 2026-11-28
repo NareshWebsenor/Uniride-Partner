@@ -11,18 +11,30 @@ export type RegistrationField = {
   validation?: { minLength?: number; maxLength?: number; minDigits?: number; maxDigits?: number; min?: number; max?: number; pattern?: string; patternMessage?: string };
 };
 export type Vehicle = {
-  model_id: string; fuel_type_id?: string; year: number; registration_number: string; colour: string;
+  model_id: string; category_id?: string; fuel_type_id?: string; year: number; registration_number: string; colour: string;
   documents: { registration_certificate: FileAnswer; insurance: FileAnswer; pollution_certificate?: FileAnswer };
 };
 export type VehicleDraft = {
-  type_id: string; brand_id: string; model_id: string; fuel_type_id: string;
+  type_id: string; brand_id: string; model_id: string; category_id?: string; fuel_type_id: string;
   year: string; registration_number: string; colour: string;
   documents: { registration_certificate?: FileAnswer; insurance?: FileAnswer; pollution_certificate?: FileAnswer };
 };
+export type VehicleCategory = {
+  category_id: string;
+  name: string;
+  booking_tier?: string;
+  image_url?: string | null;
+};
 export type VehicleOptions = {
-  types: { type_id: string; name: string }[];
-  brands: { brand_id: string; type_id: string; name: string }[];
-  models: { model_id: string; brand_id: string; type_id: string; name: string; passenger_capacity: number; luggage_capacity: number; fuel_types: { fuel_type_id: string; name: string }[] }[];
+  types: { type_id: string; name: string; image_url?: string | null }[];
+  brands: { brand_id: string; type_id: string; name: string; image_url?: string | null }[];
+  models: {
+    model_id: string; brand_id: string; type_id: string; name: string;
+    image_url?: string | null; passenger_capacity: number; luggage_capacity: number;
+    fuel_types: { fuel_type_id: string; name: string; image_url?: string | null }[];
+  }[];
+  categories?: VehicleCategory[];
+  fields?: RegistrationField[];
 };
 export type RegistrationForm = {
   application_id: string; state: ApplicationState; source: string; email: string;
@@ -30,13 +42,33 @@ export type RegistrationForm = {
   form_version: number; expires_at: string; reason: string | null; answers: Answers; fields: RegistrationField[];
 };
 export type VerifyResponse =
-  | { state: EditableState; application_id: string; token: string; reason: string | null }
+  | {
+      state: EditableState;
+      application_id: string;
+      token: string;
+      phone_required: boolean;
+      phone_verified: boolean;
+      reason: string | null;
+    }
   | { state: 'pending_review' | 'activation_pending' | 'active'; application_id: string };
 export type EmailCodeResponse = { message: string; expires_in: number; email_sent: boolean; development_code?: string };
-export type EmailCodePayload = { first_name: string; last_name: string; email: string };
-export type SubmitPayload = { token: string; answers: Answers; drive_mode: DriveMode; vehicle?: Vehicle };
+export type EmailCodePayload = { email: string };
+export type PhoneCodeResponse = { phone: string; development_code?: string; expires_in?: number };
+export type PhoneVerifyResponse = { phone: string; phone_verified: true };
+export type DriveModeResponse = { invitation_code_required: boolean; drive_mode?: DriveMode };
+export type InvitationCodeResponse = { invitation_code_accepted: true };
+export type SubmitPayload = { token: string; answers: Answers; vehicle?: Vehicle; accept_terms: true };
+export type SubmitResponse = { id?: string; state: 'pending_review' };
 export type DriverLoginResponse = {
   session: string; token_type: 'Bearer'; expires_in: number;
   user: { id: string; driver_id: string; email: string; name: string; actor_type: 'driver'; permissions: string[]; mfa_required: boolean };
 };
-export type RegistrationCredential = { token: string; applicationId: string; email: string; expiresAt?: string; passwordSet?: boolean };
+export type DriverProfile = {
+  id: string; driver_id?: string; email: string; name: string; phone?: string | null; status?: string;
+};
+export type RegistrationCredential = {
+  token: string; applicationId: string; email: string; expiresAt?: string;
+  phoneRequired?: boolean; phoneVerified?: boolean; phone?: string;
+  passwordSet?: boolean; driveMode?: DriveMode; driveModeSet?: boolean;
+  invitationCodeRequired?: boolean; invitationCodeAccepted?: boolean;
+};

@@ -53,7 +53,9 @@ export default function OnboardingChoiceCard({
                   size={fSize(1.45)}
                   color={index === 0 ? colors.onPrimary : colors.textSecondary}
                 />
-              ) : null}
+              ) : (
+                <View style={styles.badgeDot} />
+              )}
               <Text
                 style={[
                   styles.badgeText,
@@ -139,6 +141,12 @@ const createStyle = (theme: themeType) =>
     badgeText: {
       color: theme.onPrimary,
       fontSize: fSize(1.2),
+    },
+    badgeDot: {
+      width: wp("1.4%"),
+      height: wp("1.4%"),
+      borderRadius: 999,
+      backgroundColor: theme.onPrimary,
     },
     vehicleCard: {
       backgroundColor: theme.surface,

@@ -69,22 +69,25 @@ function validateField(field: RegistrationField, value: unknown): string | undef
   }
 }
 
+const isDedicatedRegistrationKey = (field: RegistrationField) =>
+  field.key === 'email' || field.key === 'accept_terms' || isLocalOnlyPhoneField(field);
+
 export function validateAnswers(fields: RegistrationField[], answers: Answers, email: string): Record<string, string> {
   const errors: Record<string, string> = {};
   for (const field of fields) {
-    if (!field.enabled || isLocalOnlyPhoneField(field)) continue;
+    if (!field.enabled || isDedicatedRegistrationKey(field)) continue;
     const error = validateField(field, field.key === 'email' ? email : answers[field.key]);
     if (error) errors[field.key] = error;
   }
   return errors;
 }
 
-/** Only enabled schema keys cross the API boundary; server owns verified email. */
-export function cleanAnswers(fields: RegistrationField[], answers: Answers, email: string): Answers {
+/** Only enabled schema keys cross the API boundary; email, phone, and terms have dedicated contracts. */
+export function cleanAnswers(fields: RegistrationField[], answers: Answers, _email: string): Answers {
   const clean: Answers = {};
   for (const field of fields) {
-    if (!field.enabled || !supportedTypes.has(field.type) || isLocalOnlyPhoneField(field)) continue;
-    const value = field.key === 'email' ? email : answers[field.key];
+    if (!field.enabled || !supportedTypes.has(field.type) || isDedicatedRegistrationKey(field)) continue;
+    const value = answers[field.key];
     if (blank(value)) continue;
     if (field.type === 'address' && isAddressAnswer(value)) {
       clean[field.key] = {

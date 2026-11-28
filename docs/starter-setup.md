@@ -10,32 +10,46 @@ Feature documentation hamesha is stable numbering ko follow kare:
    [Splash/startup](#module-1--splash-aur-biometric),
    [biometric implementation](biometric-app-lock.md),
    [doosre app mein biometric integration](fingerprint-lock-integration.md).
-2. **Module 2 — Auth Flow**: driver login/register APIs, six-digit email OTP,
-   original name/mobile/password/terms screens aur secure session lifecycle.
-   Signup password uses the registration-password endpoint after OTP; mobile
-   stays optional and is never submitted.
+2. **Module 2 — Auth Flow**: driver login (`POST /v1/driver-auth/login`) + profile
+   (`GET /v1/driver/me`), email sign-up, 4-digit email OTP, conditional mobile +
+   4-digit phone OTP, password setup, and secure session lifecycle.
    [Auth flow aur verification](auth-flow.md).
-3. **Module 3 — Driver Onboarding**: API-defined personal/document form → Fleet/Own
-   → optional vehicle catalog/papers → review → Under review. API integration
-   active; live account verification pending. Old city/bank/checklist previews
-   are retained but inactive and require supported schema/backend contracts.
+3. **Module 3 — Driver Onboarding**: `drive-mode` selection → conditional 6-digit
+   fleet invitation code or `vehicle-options` + papers → API-defined personal/document
+   form (`first_name`/`last_name` included; `email`/`phone` excluded from `answers`)
+   → Terms (`accept_terms: true`) + submit → Under review. Old city/bank/checklist
+   previews are retained as inactive legacy screens.
    [Driver onboarding flow aur validation](driver-onboarding.md).
 4. **Module 4 — Home aur Bottom Tabs**: Home, Trips, Earnings, Inbox, Menu navigation
-   active; Trips/Earnings/Inbox header-only. Menu has demo profile and working
+   active; Trips, Earnings and Inbox open Modules 5, 6 and 7 UI previews.
+   Menu has demo profile and working
    theme/language preferences (English/Hindi/Spanish), saved app-wide text size aur Menu detail screens.
    [Tab flow aur verification](main-tabs.md).
    [Module 4 — Text Size](text-size.md).
    [Module 4 — Menu Details](menu-details.md).
    [Module 4 — Home Ride Preview](home-rides.md): availability, 15-second requests,
    Arriving and OTP/Start Trip; demo data, backend deferred.
+5. **Module 5 — Trips UI**: Completed, Upcoming and Incomplete lists with
+   scheduled/completed/cancelled/missed details. Local demo data and SVG route
+   illustrations only; all contact/cancel/navigation actions show a preview dialog.
+   [Module 5 — Trips UI](trips.md).
+6. **Module 6 — Earnings aur Wallet UI**: All Earnings/Wallet tabs, Day/Week/Month
+   demo periods, chart and wallet balance/cash-limit cards. Financial actions only
+   show preview dialogs; no payment or earnings API is connected.
+   [Module 6 — Earnings aur Wallet UI](earnings.md).
+7. **Module 7 — Inbox aur Chat UI**: All/Unread passenger lists and local chat
+   timelines with typed messages and quick replies. In-memory demo state resets
+   on restart; calls/support/trip actions show preview dialogs, with no live messaging.
+   [Module 7 — Inbox aur Chat UI](inbox.md).
 
-Current flow: **Module 1 (Splash) → secure session restore or Module 2 (Auth)**.
+Current flow: **Module 1 (Splash) → secure session restore or Module 2 (Auth)**,
+with root route/session guards active in `Application.tsx`.
 Successful login → **Module 4 (Home aur Bottom Tabs)**; registration → **Module 3
 (Driver Onboarding)** → Under review → browser activation → Module 2 login.
 Theme/language controls Menu mein directly available hain.
 Module 1 mein biometric documentation hone ka matlab gate enabled hona nahi hai.
 
-Naye feature modules ko Module 5, Module 6, ... do; existing module IDs renumber
+Naye feature modules ko Module 8, Module 9, ... do; existing module IDs renumber
 mat karo. Ek module ke related guides wahi ID use karein. Theme, localization,
 responsive sizing aur build/recovery sab modules ka shared setup hain; har
 supporting document ko naya feature-module number mat do.

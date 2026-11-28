@@ -19,7 +19,7 @@ function record(value: unknown): value is Record<string, unknown> {
 }
 type Options = {
   method?: 'GET' | 'POST'; body?: unknown; params?: Record<string, unknown>;
-  authenticated?: boolean; headers?: Record<string, string>; rawBody?: Blob;
+  authenticated?: boolean; headers?: Record<string, string>; rawBody?: Blob | { uri: string };
   signal?: AbortSignal;
 };
 
@@ -56,6 +56,7 @@ export async function driverRequest<T = unknown>(path: string, options: Options 
           'X-Uniride-Workspace': DRIVER_WORKSPACE,
           ...(token ? { Authorization: `Bearer ${token}` } : {}) },
         data: options.rawBody ?? options.body,
+        ...(options.rawBody ? { transformRequest: [(raw: unknown) => raw] } : {}),
         params: options.params,
         signal: controller.signal,
       });
@@ -68,10 +69,23 @@ export async function driverRequest<T = unknown>(path: string, options: Options 
       const retryAfter = parseRetryAfter(typeof retryHeader === 'string' ? retryHeader : null);
       if (response.status < 200 || response.status >= 300) {
         const error = record(data) && record(data.error) ? data.error : {};
-        throw new DriverApiError(response.status,
-          typeof error.code === 'string' ? error.code : 'request_failed',
-          typeof error.message === 'string' ? error.message : '',
-          retryAfter);
+        const code =
+          typeof error.code === 'string'
+            ? error.code
+            : record(data) && typeof data.code === 'string'
+              ? data.code
+              : 'request_failed';
+        const message =
+          typeof error.message === 'string'
+            ? error.message
+            : record(data) && typeof data.message === 'string'
+              ? data.message
+              : record(data) && typeof data.error === 'string'
+                ? data.error
+                : record(data) && typeof data.detail === 'string'
+                  ? data.detail
+                  : '';
+        throw new DriverApiError(response.status, code, message, retryAfter);
       }
       if (typeof data === 'string') throw new DriverApiError(response.status, 'invalid_response');
       // Endpoint adapters validate their own response schema before exposing it.
@@ -84,8 +98,12 @@ export async function driverRequest<T = unknown>(path: string, options: Options 
     const code = axios.isCancel(error) ? 'aborted'
       : axios.isAxiosError(error) && (error.code === 'ECONNABORTED' || error.code === 'ETIMEDOUT') ? 'timeout' : 'network';
     const failure = error instanceof DriverApiError ? error : new DriverApiError(0, code);
-    // Codes/messages from the server may contain user data; log HTTP status only.
-    logger.warn('driver_api.failed', { scope: 'driver_api', status: failure.status });
+    // Codes/messages from the server may contain user data; log path/status/code only.
+    logger.warn('driver_api.failed', {
+      scope: path,
+      status: failure.status,
+      code: failure.code,
+    });
     throw failure;
   } finally {
     clearTimeout(timeout);

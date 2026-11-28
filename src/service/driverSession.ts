@@ -66,15 +66,27 @@ export function clearRegistrationCredential(): Promise<void> {
 export function getRegistrationCredential(): Promise<RegistrationCredential | null> {
   return serialRegistration(async () => {
     const value = await read(REGISTRATION_SERVICE);
-    if (!record(value) || !nonempty(value.token) || !nonempty(value.applicationId) || !nonempty(value.email) ||
+    if (!record(value) || !nonempty(value.token) || typeof value.applicationId !== 'string' || !nonempty(value.email) ||
       (value.expiresAt !== undefined && (typeof value.expiresAt !== 'string' ||
         !Number.isFinite(Date.parse(value.expiresAt)) || Date.parse(value.expiresAt) <= Date.now()))) {
       await resetGenericPassword({ service: REGISTRATION_SERVICE });
       return null;
     }
-    return { token: value.token, applicationId: value.applicationId, email: value.email,
+    const driveMode = value.driveMode === 'fleet_partner' || value.driveMode === 'own_vehicle' ? value.driveMode : undefined;
+    return {
+      token: value.token,
+      applicationId: value.applicationId,
+      email: value.email,
+      ...(typeof value.phoneRequired === 'boolean' ? { phoneRequired: value.phoneRequired } : {}),
+      ...(typeof value.phoneVerified === 'boolean' ? { phoneVerified: value.phoneVerified } : {}),
+      ...(nonempty(value.phone) ? { phone: value.phone } : {}),
       ...(value.passwordSet === true ? { passwordSet: true } : {}),
-      ...(typeof value.expiresAt === 'string' ? { expiresAt: value.expiresAt } : {}) };
+      ...(driveMode ? { driveMode } : {}),
+      ...(value.driveModeSet === true ? { driveModeSet: true } : {}),
+      ...(typeof value.invitationCodeRequired === 'boolean' ? { invitationCodeRequired: value.invitationCodeRequired } : {}),
+      ...(typeof value.invitationCodeAccepted === 'boolean' ? { invitationCodeAccepted: value.invitationCodeAccepted } : {}),
+      ...(typeof value.expiresAt === 'string' ? { expiresAt: value.expiresAt } : {}),
+    };
   });
 }
 

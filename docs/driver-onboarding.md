@@ -8,14 +8,20 @@ onboarding screens remain in the repository as inactive preview code.
 
 ## Active flow
 
-Module 2 retains first/last name, email verification, optional mobile, API-connected signup
-password UI and terms. It then opens `DriverRegistrationScreen`:
+Module 2 handles email sign-up, 4-digit email OTP, conditional phone + 4-digit
+phone OTP (`phone_required: true`), and Create password. It then opens
+`DriverRegistrationScreen`:
 
-1. Load `POST /v1/driver-registration/form` using the secure registration token.
-2. Render enabled personal/document fields in server order, prefilling answers.
-3. Choose how to drive: `fleet_partner` or `own_vehicle`.
-4. Fleet skips vehicle data; Own loads the catalog and vehicle papers.
-5. Review enabled answers and submit. Success opens Under review, not Home.
+1. Choose how to drive (`POST /v1/driver-registration/drive-mode`): `fleet_partner` or `own_vehicle`.
+2. Fleet with `invitation_code_required: true` verifies a 6-digit invitation code
+   (`POST /v1/driver-registration/invitation-code`). Own loads vehicle options
+   (`POST /v1/driver-registration/vehicle-options`) and collects vehicle details/papers.
+3. Load `POST /v1/driver-registration/form` using the secure registration token and
+   render enabled personal/document fields (`first_name`, `last_name`, documents, etc.;
+   `email` and `phone` are excluded from submitted `answers`). `changes_requested`
+   shows the server reason banner.
+4. Review enabled answers, accept Terms (`accept_terms: true`), and submit
+   (`POST /v1/driver-registration/submit`). Success opens Under review, not Home.
 
 Admin assignment to staff/hybrid/freelancer is never shown or sent. Approval sends
 an activation email; the driver follows its remaining activation instructions,

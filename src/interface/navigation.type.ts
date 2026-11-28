@@ -19,6 +19,8 @@ export type TRootStack = TDriverOnboardingStack & {
   RegistrationStatusScreen: { state: 'pending_review' | 'activation_pending'; email: string };
   // Preserve this route ID for the deferred biometric gate and existing callers.
   MainStack: undefined;
+  TripDetailsScreen: { tripId: string };
+  ChatScreen: { conversationId: string };
   SettingsScreen: undefined;
   TextSizeScreen: undefined;
   MyDocumentsScreen: undefined;

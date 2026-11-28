@@ -3,13 +3,18 @@ import { StyleSheet, View } from "react-native";
 import { Card, Text } from "@/components/ui";
 import { useAppTranslation } from "@/hooks/useAppTranslation";
 import { useThemeColor } from "@/hooks/useThemeColor";
+import { useAuthStore } from "@/store/authStore";
 import { Ionicons } from "@/utils/fontIcon.utils";
 import { fSize, hp, wp } from "@/utils/responsive.utils";
 
-// Display-only reference data; not an authenticated or verified driver record.
 export default function MenuProfileCard() {
   const { t } = useAppTranslation();
   const colors = useThemeColor();
+  const driverProfile = useAuthStore((state) => state.driverProfile);
+  const driverUser = useAuthStore((state) => state.driverUser);
+  const displayName =
+    driverProfile?.name?.trim() || driverUser?.name?.trim() || t("menu.demoName");
+  const displayEmail = driverProfile?.email || driverUser?.email;
   return (
     <Card style={[styles.card, { shadowColor: colors.shadow }]}>
       <View
@@ -19,7 +24,7 @@ export default function MenuProfileCard() {
       </View>
       <View style={styles.details}>
         <View style={styles.nameRow}>
-          <Text style={styles.name}>{t("menu.demoName")}</Text>
+          <Text style={styles.name}>{displayName}</Text>
           <Ionicons
             name="checkmark-circle"
             size={wp("4%")}
@@ -27,14 +32,20 @@ export default function MenuProfileCard() {
             accessibilityLabel={t("profile.verified")}
           />
         </View>
-        <View
-          style={styles.rating}
-          accessibilityLabel={t("menu.rating", { rating: "4.92" })}
-          accessible
-        >
-          <Ionicons name="star" size={wp("3.5%")} color={colors.warning} />
-          <Text style={styles.ratingText}>{t("menu.demoRating")}</Text>
-        </View>
+        {displayEmail ? (
+          <Text tone="secondary" style={styles.ratingText}>
+            {displayEmail}
+          </Text>
+        ) : (
+          <View
+            style={styles.rating}
+            accessibilityLabel={t("menu.rating", { rating: "4.92" })}
+            accessible
+          >
+            <Ionicons name="star" size={wp("3.5%")} color={colors.warning} />
+            <Text style={styles.ratingText}>{t("menu.demoRating")}</Text>
+          </View>
+        )}
       </View>
     </Card>
   );

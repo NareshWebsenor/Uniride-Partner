@@ -18,9 +18,8 @@ export type RegistrationFieldsProps = {
 
 export default function RegistrationFields({ fields, answers, email, token, onChange, errors, onApiError, onBusyChange, disabled }: RegistrationFieldsProps) {
   const { t } = useAppTranslation();
-  return <View style={styles.fields}>{fields.filter(field => field.enabled).map(field => {
-    const label = isLocalOnlyPhoneField(field) ? t('driverRegistration.optionalField', { label: field.label })
-      : field.required ? t('driverRegistration.fields.requiredLabel', { label: field.label }) : field.label;
+  return <View style={styles.fields}>{fields.filter(field => field.enabled && !isLocalOnlyPhoneField(field)).map(field => {
+    const label = field.required ? t('driverRegistration.fields.requiredLabel', { label: field.label }) : field.label;
     const value = field.key === 'email' ? email : answers[field.key];
     const stringValue = typeof value === 'string' ? value : '';
     const change = (answer: Answer | undefined) => onChange(field.key, answer);

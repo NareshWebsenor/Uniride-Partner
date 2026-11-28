@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo } from "react";
 import { AppState } from "react-native";
 import { useAuthStore } from "@/store/authStore";
 import { clearDriverSession } from "@/service/driverSession";
+import { getDriverProfile } from "@/service/rest/auth";
 import { logger } from "@/utils/logger";
 import DriverRegistrationScreen from "@/screens/driverOnboarding/DriverRegistrationScreen";
 import RegistrationStatusScreen from "@/screens/auth/RegistrationStatusScreen";
@@ -10,6 +11,8 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { NavigationContainer } from "@react-navigation/native";
 import { navigationRef } from "@/utils/navigation.utils";
 import MainTabs from "./MainTabs";
+import TripDetailsScreen from '@/screens/main/trips/TripDetailsScreen';
+import ChatScreen from '@/screens/main/inbox/ChatScreen';
 import SplashScreen from "@/screens/splash/SplashScreen";
 import LoginScreen from "@/screens/auth/LoginScreen";
 import SettingsScreen from "@/screens/settings/SettingsScreen";
@@ -52,6 +55,7 @@ function AuthenticatedMainTabs() {
   const expiry = useAuthStore((state) => state.sessionExpiresAt);
   return token && expiry && expiry > Date.now() ? <MainTabs /> : null;
 }
+
 const PUBLIC_ROUTES = new Set([
   "SplashScreen",
   "LoginScreen",
@@ -60,6 +64,7 @@ const PUBLIC_ROUTES = new Set([
   "SettingsScreen",
   "TextSizeScreen",
 ]);
+
 export default function Application({ onRouteChange }: ApplicationProps) {
   const token = useAuthStore((state) => state.token);
   const expiresAt = useAuthStore((state) => state.sessionExpiresAt);
@@ -94,6 +99,11 @@ export default function Application({ onRouteChange }: ApplicationProps) {
   useEffect(() => {
     notifyProtectedRouteChange();
     if (!token || !expiresAt) return;
+    if (expiresAt > Date.now() && !useAuthStore.getState().driverProfile) {
+      void getDriverProfile()
+        .then((profile) => useAuthStore.getState().setDriverProfile(profile))
+        .catch(() => undefined);
+    }
     const expire = () => {
       if (expiresAt <= Date.now()) {
         void clearDriverSession().catch(() =>
@@ -118,7 +128,7 @@ export default function Application({ onRouteChange }: ApplicationProps) {
       onStateChange={notifyProtectedRouteChange}
     >
       <RootNavigator.Navigator
-        initialRouteName="MainStack"
+        initialRouteName="SplashScreen"
         screenOptions={{
           headerShown: false,
           statusBarStyle:
@@ -193,6 +203,8 @@ export default function Application({ onRouteChange }: ApplicationProps) {
           component={AuthenticatedMainTabs}
           name="MainStack"
         />
+        <RootNavigator.Screen component={TripDetailsScreen} name="TripDetailsScreen" />
+        <RootNavigator.Screen component={ChatScreen} name="ChatScreen" />
         <RootNavigator.Screen
           component={SettingsScreen}
           name="SettingsScreen"

@@ -1,10 +1,29 @@
 This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
 
-Driver auth APIs are integrated: email/password login restores a secure session;
-registration retains first/last name → email OTP → mobile → password screen →
-terms → dynamic application/vehicle form → Under review. Names are sent with
-the email-code request; password setup uses the registration-password API after
-OTP. Mobile is optional and excluded from all registration payloads. Home rides remain a demo; biometric source remains deferred.
+Startup hydrates preferences, opens `SplashScreen`, and restores a valid
+Keychain driver session into `MainStack`/Home; otherwise it opens `LoginScreen`
+(Login/Register) with protected-route guards enforced in `Application.tsx`.
+See [Module 2 — Auth Flow](docs/auth-flow.md).
+
+Trips has Completed, Upcoming and Incomplete lists plus status-specific details.
+This is a local-data UI preview with SVG maps; contact, cancel and navigation
+controls show a demo dialog. See [Module 5 — Trips UI](docs/trips.md).
+
+Earnings has All Earnings/Wallet tabs, fixed Day/Week/Month demo periods, a chart
+and wallet cards. Deposit and rate-card actions are preview-only; no payment is
+made. See [Module 6 — Earnings aur Wallet UI](docs/earnings.md).
+
+Inbox has All/Unread passenger lists and chat screens with local messages and
+quick replies. Conversations reset on restart; no messages are sent to passengers.
+See [Module 7 — Inbox aur Chat UI](docs/inbox.md).
+
+Driver auth APIs are integrated: email/password login + `GET /v1/driver/me` profile restore a secure session;
+registration uses email-only sign-up → 4-digit email OTP → conditional mobile +
+4-digit phone OTP (when `phone_required: true`) → create password → drive mode
+→ optional 6-digit fleet invitation code / own-vehicle catalog → dynamic
+application/vehicle form → Terms + submit → Under review. `email` and `phone`
+are excluded from `answers` (`first_name`/`last_name` come from dynamic form
+fields). Home rides remain a demo; biometric source remains deferred.
 
 Set `DRIVER_API_BASE_URL_DEV`, `DRIVER_API_BASE_URL_PROD` and `UNIRIDE_WORKSPACE`
 using `.env.example`. API origins exclude `/v1`; the client adds it. Registration
@@ -20,7 +39,10 @@ account/email/upload/submission verification requires an authorized test account
 [Module 4 — Home aur Bottom Tabs](docs/main-tabs.md) ·
 [Module 4 — Text Size](docs/text-size.md) ·
 [Module 4 — Menu Details](docs/menu-details.md) ·
-[Module 4 — Home Ride Preview](docs/home-rides.md).
+[Module 4 — Home Ride Preview](docs/home-rides.md) ·
+[Module 5 — Trips UI](docs/trips.md) ·
+[Module 6 — Earnings aur Wallet UI](docs/earnings.md) ·
+[Module 7 — Inbox aur Chat UI](docs/inbox.md).
 
 # Getting Started
 

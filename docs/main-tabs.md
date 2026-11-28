@@ -1,15 +1,23 @@
 # Module 4 — Home aur Bottom Tabs
 
-Status: navigation active; Trips, Earnings aur Inbox header-only screens hain.
+Status: all five tab destinations have active UI.
+Trips now opens [Module 5 — Trips UI](trips.md), with category lists and trip details.
+Earnings opens [Module 6 — Earnings aur Wallet UI](earnings.md), with local
+period selection, reference charts and a demo wallet.
+Inbox opens [Module 7 — Inbox aur Chat UI](inbox.md), with All/Unread passenger
+lists and in-memory chat previews.
 Home now includes [Module 4 — Home Ride Preview](home-rides.md): Offline/Online,
 timed requests, Arriving and OTP/Start Trip with demo data.
 Menu mein reference-based profile/settings UI aur working appearance/language controls hain.
 Notifications ke neeche saved app-wide [Text Size (Module 4)](text-size.md) active hai.
-Backend data, trips, payouts aur messaging is module mein implement nahi hue hain.
+Backend trip data, payouts aur messaging is module mein implement nahi hue hain.
 
 ## Flow
 
-Module 2 login preview / Module 3 onboarding completion → `MainStack` → Home.
+Module 2 login / Module 3 onboarding completion / Splash session restore → `MainStack` → Home.
+`Application.tsx` wraps `MainStack` in `AuthenticatedMainTabs` and redirects
+unauthenticated protected-route access to `LoginScreen`. Explicit Logout clears
+the driver session and resets to Module 2 Login.
 Bottom bar ka order: Home, Trips, Earnings, Inbox, Menu. Home initial selection hai;
 Android back kisi doosre tab se Home par laata hai. Splash, auth, onboarding aur
 root Settings screen par bar nahi dikhta. Home ka App settings button removed hai;
@@ -24,7 +32,13 @@ appearance/language ab Menu ke direct controls se change hote hain.
   pale rounded icon highlight aur equal-width tabs. Existing legacy `BottomTab`
   import canonical component ko re-export karta hai; uska koi active caller nahi tha.
 - `src/assets/svg/MainTabIcon.tsx`: vector icons installed SVG library se render hote hain.
-- Trips/Earnings/Inbox `ScreenWrapper` aur translated heading use karte hain.
+- Inbox uses AppBackground and Module 7's passenger-list UI. `ChatScreen` opens
+  on the root stack with `{ conversationId }`, hiding tabs; messages/read state
+  remain in memory until restart, with no live messaging transport.
+  Earnings uses AppBackground and Module 6's All Earnings/Wallet UI; period
+  controls update local demo data, while financial actions show preview dialogs.
+  Trips uses AppBackground and the Module 5 category-list UI; `TripDetailsScreen`
+  opens on the root stack with `{ tripId }`, hiding the bottom bar.
   Home `AppBackground`, themed map layer and scrollable state-specific panels uses.
   Menu `AppBackground` aur scrollable grouped cards use karta hai.
 - Bar bottom inset own karta hai; screen layout bottom inset zero karta hai.
@@ -57,6 +71,11 @@ appearance/language ab Menu ke direct controls se change hote hain.
 
 ## Verification
 
+- Direct-entry preview: existing Android emulator restarted with Metro on 8081;
+  Home and all five tab buttons rendered without login/register. Screenshot:
+  `/private/tmp/uniride-mainstack-preview.png`. `main-tabs` and `App` Jest suites
+  pass (3/3), UI rules and diff checks pass. Type-check still has the existing
+  TextArea/CardImageComponent errors. Physical device/release build not tested.
 - Main tab tests cover initial Home, five routes, back-to-Home, prevented press,
   long press and live theme/language updates. Text size has its own store/UI tests.
 - Menu detail update: full suite **114 pass / 8 existing failures** in legacy

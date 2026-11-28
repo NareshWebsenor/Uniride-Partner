@@ -6,6 +6,11 @@ import {
   ProfileIcon,
 } from './svg/TabBar';
 import MagicIcon from './svg/MagicIcon';
+import GoogleMark from './svg/GoogleMark';
+import TripIcon from './svg/TripIcon';
+import TripRouteMap from './svg/TripRouteMap';
+import EarningsIcon from './svg/EarningsIcon';
+import InboxIcon from './svg/InboxIcon';
 
 export const IMAGES = {
   logoWithoutName: require('@/assets/images/logo.png'),
@@ -25,5 +30,10 @@ export const SVG = {
   InvestIcon,
   RewardIcon,
   ProfileIcon,
-  MagicIcon
+  MagicIcon,
+  GoogleMark,
+  TripIcon,
+  TripRouteMap,
+  EarningsIcon,
+  InboxIcon,
 };

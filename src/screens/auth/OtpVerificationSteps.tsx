@@ -44,7 +44,7 @@ export function EmailStep({
         testID="email-otp"
         value={code}
         onChangeText={onChange}
-        otpLength={6}
+        otpLength={4}
         isEditable={!disabled}
         accessibilityLabel={t('partnerAuth.otpLabel')}
       />
@@ -54,6 +54,60 @@ export function EmailStep({
       <Button
         isGradiantRequired={false}
         testID="resend"
+        title={
+          remaining
+            ? t('partnerAuth.resendIn', { count: remaining })
+            : t('partnerAuth.resend')
+        }
+        onPress={onResend}
+        disabled={remaining > 0 || disabled}
+        variant="secondary"
+        style={styles.resend}
+      />
+    </View>
+  );
+}
+
+export function PhoneOtpStep({
+  phone,
+  code,
+  onChange,
+  onResend,
+  remaining,
+  disabled = false,
+}: {
+  phone: string;
+  code: string;
+  onChange: (value: string) => void;
+  onResend: () => void;
+  remaining: number;
+  disabled?: boolean;
+}) {
+  const { t } = useAppTranslation();
+  const styles = useThemedStyles(createStyle);
+  return (
+    <View style={styles.fields}>
+      <StackHeader
+        showBackIcon={false}
+        showDivider={false}
+        style={styles.plainHeader}
+        titleStyle={styles.title}
+        title={t('partnerAuth.phoneOtpTitle', { phone })}
+      />
+      <CustomTextInput
+        testID="phone-otp"
+        value={code}
+        onChangeText={onChange}
+        otpLength={4}
+        isEditable={!disabled}
+        accessibilityLabel={t('partnerAuth.phoneOtpLabel')}
+      />
+      <Text tone="secondary" variant="caption">
+        {t('partnerAuth.phoneOtpHint')}
+      </Text>
+      <Button
+        isGradiantRequired={false}
+        testID="phone-resend"
         title={
           remaining
             ? t('partnerAuth.resendIn', { count: remaining })

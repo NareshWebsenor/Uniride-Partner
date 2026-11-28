@@ -31,7 +31,7 @@ test("opens Home, switches all five tabs and returns Home on back", async () => 
     );
   });
   const tabs = () =>
-    tree.root.findAll(
+    tree.root.findByType(BottomTabBar).findAll(
       (node) =>
         node.props.accessibilityRole === "tab" &&
         typeof node.props.onPress === "function"
@@ -60,6 +60,12 @@ test("opens Home, switches all five tabs and returns Home on back", async () => 
       ).toBeGreaterThan(0);
     } else if (name === 'Home') {
       expect(tree.root.findAllByProps({ testID: 'home-screen' }).length).toBeGreaterThan(0);
+    } else if (name === 'Trips') {
+      expect(tree.root.findAllByProps({ testID: 'trips-screen' }).length).toBeGreaterThan(0);
+    } else if (name === 'Earnings') {
+      expect(tree.root.findAllByProps({ testID: 'earnings-screen' }).length).toBeGreaterThan(0);
+    } else if (name === 'Inbox') {
+      expect(tree.root.findAllByProps({ testID: 'inbox-screen' }).length).toBeGreaterThan(0);
     } else {
       expect(
         tree.root

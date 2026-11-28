@@ -11,33 +11,31 @@ has not been verified. Biometric app lock remains deferred.
 
 Startup hydrates preferences, shows Splash, and restores a valid driver session
 from Keychain. An active session opens Home; otherwise LoginScreen resumes an
-editable registration or its saved review state, when available.
+editable registration or its saved review state, when available. `Application.tsx`
+guards `MainStack` and protected routes, redirecting missing/expired sessions to
+`LoginScreen`.
 
-- Login: email + password → `POST /v1/driver-auth/login` → secure session → Home.
-- Registration keeps the original product fields/screens: first name, optional
-  last name, email → six-digit email OTP → mobile → Create password → terms →
-  API-defined personal/document form → Fleet/Own → review → Under review.
-- Create password is active after email verification and the optional mobile step.
-  Password and confirmation must match the existing client checklist (8+ characters,
-  a digit and a non-digit); the server remains authoritative. Continue calls
-  `POST /v1/driver-registration/password` with `{ token, password }` and advances
-  only after `{ password_set: true }`. Confirm password is never sent. Both inputs
-  are memory-only and cleared after success; the credential stores only a
-  non-secret `passwordSet` marker to resume without bypassing unfinished setup.
-- `email-code` and resend send `{ first_name, last_name, email }`. First/last name
-  and local agreement also prefill matching enabled `first_name`, `last_name`,
-  `accept_terms` fields without overwriting existing server answers.
-- Mobile stays optional. Empty Continue skips the phone request. A filled number
-  calls `setRegistrationPhone(token, phone)` in `src/service/rest/auth.ts`:
-  `POST /v1/driver-registration/phone` with `{ token, phone }`, combining the
-  selected country dial code and national digits (for example `+919812345678`).
-  Only a valid `{ phone: string }` response advances to password. Pending requests
-  disable editing and repeated Continue taps; failures stay visible for retry,
-  and expired credentials return to email verification. Server validation remains
-  authoritative. Phone is not cached locally or included in dynamic form answers.
-- Google sign-in is hidden. SMS verification and Forgot password have no driver
-  backend. The phone endpoint saves the number without SMS verification. The app never
-  offers the admin-only staff/hybrid/freelancer assignment.
+- Login: email + password → `POST /v1/driver-auth/login` → secure session → `GET /v1/driver/me` profile → Home.
+- Registration follows the updated API sequence: email → 4-digit email OTP
+  (`POST /v1/driver-registration/verify` returning `token`, `state`,
+  `phone_required`, `phone_verified`) → when `phone_required: true` and not
+  verified, mobile number + 4-digit SMS OTP (`POST /v1/driver-registration/phone`
+  and `POST /v1/driver-registration/phone/verify`) → Create password →
+  `DriverRegistrationScreen` (Select drive mode → 6-digit Fleet invitation code
+  when `invitation_code_required: true` or Own vehicle options → dynamic personal/document
+  form → Review + Terms & Submit with `accept_terms: true`) → Under review.
+- Create password calls `POST /v1/driver-registration/password` with `{ token, password }`
+  and advances to `DriverRegistrationScreen` only after `{ password_set: true }`.
+  Confirm password is never sent. Both inputs are memory-only and cleared after success;
+  the credential stores only non-secret progress markers to resume cleanly.
+- `email-code` sends `{ email }`. `first_name` and `last_name` are collected in the
+  dynamic driver form (`#9`), while `email` and `phone` are never submitted inside `answers`.
+- When `phone_required: false` (or already `phone_verified: true`), both mobile and
+  phone OTP screens are skipped. When `phone_required: true`, entering the number
+  calls `POST /v1/driver-registration/phone` and verifies the 4-digit code via
+  `POST /v1/driver-registration/phone/verify` (`{ phone, phone_verified: true }`).
+- Google sign-in and Forgot password remain hidden/unavailable without driver backend
+  endpoints. Admin-only staff/hybrid/freelancer assignment is never offered.
 
 ## API and environment
 
